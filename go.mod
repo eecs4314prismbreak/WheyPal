@@ -1,4 +1,4 @@
-module github.com/AllenKaplan/ak-rest-api
+module github.com/eecs4314prismbreak/WheyPal
 
 go 1.15
 
@@ -7,8 +7,8 @@ replace github.com/eecs4314prismbreak/WheyPal/user => ./user
 replace github.com/eecs4314prismbreak/WheyPal/auth => ./auth
 
 require (
-	github.com/eecs4314prismbreak/wheypal/auth v1.0.0
-	github.com/eecs4314prismbreak/wheypal/user v1.0.0
+	github.com/eecs4314prismbreak/WheyPal/auth v1.0.0
+	github.com/eecs4314prismbreak/WheyPal/user v1.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
