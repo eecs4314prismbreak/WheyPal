@@ -2,9 +2,9 @@ module github.com/AllenKaplan/ak-rest-api
 
 go 1.15
 
-replace github.com/eecs4314prismbreak/wheypal/user => ./user
+replace github.com/eecs4314prismbreak/WheyPal/user => ./user
 
-replace github.com/eecs4314prismbreak/wheypal/auth => ./auth
+replace github.com/eecs4314prismbreak/WheyPal/auth => ./auth
 
 require (
 	github.com/eecs4314prismbreak/wheypal/auth v1.0.0
