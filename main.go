@@ -1,8 +1,8 @@
 package main
 
 import (
-	auth "github.com/eecs4314prismbreak/wheypal/auth"
-	user "github.com/eecs4314prismbreak/wheypal/user"
+	auth "github.com/eecs4314prismbreak/WheyPal/auth"
+	user "github.com/eecs4314prismbreak/WheyPal/user"
 
 	"github.com/gin-gonic/gin"
 )

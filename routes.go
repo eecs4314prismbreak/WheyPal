@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	auth "github.com/allenkaplan/ak-rest-api/auth"
-	user "github.com/allenkaplan/ak-rest-api/user"
+	auth "github.com/eecs4314prismbreak/WheyPal/auth"
+	user "github.com/eecs4314prismbreak/WheyPal/user"
 	"github.com/gin-gonic/gin"
 )
 
