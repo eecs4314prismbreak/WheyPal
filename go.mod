@@ -1,4 +1,4 @@
-module github.com/AllenKaplan/ak-rest-api
+module github.com/eecs4314prismbreak/WheyPal/
 
 go 1.15
 
