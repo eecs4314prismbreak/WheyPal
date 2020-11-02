@@ -1,8 +1,8 @@
 package main
 
 import (
-	auth "github.com/allenkaplan/ak-rest-api/auth"
-	user "github.com/allenkaplan/ak-rest-api/user"
+	auth "github.com/eecs4314prismbreak/wheypal/auth"
+	user "github.com/eecs4314prismbreak/wheypal/user"
 
 	"github.com/gin-gonic/gin"
 )

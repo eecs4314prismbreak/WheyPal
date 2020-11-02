@@ -2,13 +2,13 @@ module github.com/AllenKaplan/ak-rest-api
 
 go 1.15
 
-replace github.com/allenkaplan/ak-rest-api/user => ./user
+replace github.com/eecs4314prismbreak/wheypal/user => ./user
 
-replace github.com/allenkaplan/ak-rest-api/auth => ./auth
+replace github.com/eecs4314prismbreak/wheypal/auth => ./auth
 
 require (
-	github.com/allenkaplan/ak-rest-api/auth v1.0.0
-	github.com/allenkaplan/ak-rest-api/user v1.0.0
+	github.com/eecs4314prismbreak/wheypal/auth v1.0.0
+	github.com/eecs4314prismbreak/wheypal/user v1.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
