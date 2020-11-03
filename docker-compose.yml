@@ -1,0 +1,17 @@
+version: "3.8"
+   
+services:
+  # db:
+  #   image: postgres
+  #   environment:
+  #     - POSTGRES_DB=postgres
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  web:
+    image: eecs4314prismbreak/wheypal
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+    # depends_on:
+    #   - db

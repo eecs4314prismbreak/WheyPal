@@ -9,7 +9,7 @@ replace github.com/eecs4314prismbreak/WheyPal/auth => ./auth
 require (
 	github.com/eecs4314prismbreak/WheyPal/auth v1.0.0
 	github.com/eecs4314prismbreak/WheyPal/user v1.0.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
