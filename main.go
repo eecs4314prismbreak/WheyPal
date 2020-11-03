@@ -27,9 +27,8 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		// AllowOrigins:     []string{"https://wheypal.com", "http://localhost:8080"},
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"PUT", "PATCH"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
