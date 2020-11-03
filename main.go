@@ -25,7 +25,8 @@ func main() {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://wheypal.com", "localhost:8080"},
+		// AllowOrigins:     []string{"https://wheypal.com", "http://localhost:8080"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "PATCH"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -45,5 +46,5 @@ func main() {
 	router.PUT("/login", auth.CheckJWT(), updateLogin)
 	router.POST("/auth", auth.CheckJWT(), validate)
 
-	router.Run(port)
+	router.Run(":" + port)
 }
