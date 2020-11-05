@@ -130,15 +130,27 @@ func updateLogin(c *gin.Context) {
 }
 
 func login(c *gin.Context) {
+	type LoginResponse struct {
+		Name string `json:"name"`
+		*auth.AuthResponse
+	}
+
 	var login *auth.LoginRequest
 
 	c.ShouldBind(&login)
 
-	resp, err := authSrv.Login(login)
+	authResponse, err := authSrv.Login(login)
 
 	if err != nil {
 		c.JSON(500, fmt.Sprintf("%v", err))
 		return
+	}
+
+	userResponse, err := userSrv.Get(authResponse.ID)
+
+	resp := &LoginResponse{
+		Name:         userResponse.Name,
+		AuthResponse: authResponse,
 	}
 
 	c.JSON(200, &resp)
