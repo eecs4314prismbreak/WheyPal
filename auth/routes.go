@@ -6,7 +6,15 @@ import (
 	"time"
 )
 
-func (s *AuthService) Login(login *LoginRequest) (*AuthResponse, error) {
+type AuthService interface {
+	Login(*LoginRequest) (*AuthResponse, error)
+	ValidateToken(int, string) (*Claims, error)
+	Create(*Login) (*AuthResponse, error)
+	Update(int, *LoginRequest) (bool, error)
+	generateToken(int) (*StoredToken, error)
+}
+
+func (s *authService) Login(login *LoginRequest) (*AuthResponse, error) {
 	//find user based on email
 	retrievedLogin, err := s.Repo.getLogin(login.Email)
 	if err != nil {
@@ -46,7 +54,7 @@ func (s *AuthService) Login(login *LoginRequest) (*AuthResponse, error) {
 	return token, nil
 }
 
-func (s *AuthService) ValidateToken(userID int, token string) (*Claims, error) {
+func (s *authService) ValidateToken(userID int, token string) (*Claims, error) {
 	//retrieve token from cache
 	retrievedToken, err := s.Repo.retrieveToken(userID)
 	if err != nil {
@@ -71,7 +79,7 @@ func (s *AuthService) ValidateToken(userID int, token string) (*Claims, error) {
 	return claims, nil
 }
 
-func (s *AuthService) Create(login *Login) (*AuthResponse, error) {
+func (s *authService) Create(login *Login) (*AuthResponse, error) {
 	retrievedLogin, err := s.Repo.create(login)
 	if err != nil {
 		return nil, fmt.Errorf("%v --> %s", err, "error creating login")
@@ -91,7 +99,7 @@ func (s *AuthService) Create(login *Login) (*AuthResponse, error) {
 	return token, nil
 }
 
-func (s *AuthService) Update(userID int, loginRequest *LoginRequest) (bool, error) {
+func (s *authService) Update(userID int, loginRequest *LoginRequest) (bool, error) {
 	login := &Login{
 		UserID:   userID,
 		Email:    loginRequest.Email,
@@ -106,7 +114,7 @@ func (s *AuthService) Update(userID int, loginRequest *LoginRequest) (bool, erro
 	return updateSuccess, nil
 }
 
-func (s *AuthService) generateToken(userID int) (*StoredToken, error) {
+func (s *authService) generateToken(userID int) (*StoredToken, error) {
 	generatedToken, expiry, err := createJWT(userID)
 	if err != nil {
 		return nil, fmt.Errorf("%v --> %s", err, "error generating token")

@@ -1,11 +1,11 @@
 package user
 
-type UserService struct {
-	db *UserDatabase
+type userService struct {
+	db UserRepo
 }
 
-func NewService() *UserService {
-	return &UserService{
+func NewService() UserService {
+	return &userService{
 		db: NewDatabase(),
 	}
 }

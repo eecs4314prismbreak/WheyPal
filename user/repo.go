@@ -1,16 +1,22 @@
 package user
 
-type UserDatabase struct {
+type UserRepo interface {
+	getAllUsers() ([]*User, error)
+	get(int) (*User, error)
+	create(*User) (*User, error)
+	update(*User) (*User, error)
+}
+type userRepo struct {
 	users map[int]*User
 }
 
-func NewDatabase() *UserDatabase {
-	return &UserDatabase{
+func NewDatabase() UserRepo {
+	return &userRepo{
 		users: make(map[int]*User),
 	}
 }
 
-func (db *UserDatabase) getAllUsers() ([]*User, error) {
+func (db *userRepo) getAllUsers() ([]*User, error) {
 	//s.db.get
 	var userList []*User
 	for _, u := range db.users {
@@ -19,19 +25,19 @@ func (db *UserDatabase) getAllUsers() ([]*User, error) {
 	return userList, nil
 }
 
-func (db *UserDatabase) get(userID int) (*User, error) {
+func (db *userRepo) get(userID int) (*User, error) {
 	//s.db.get
 	var user *User
 	user = db.users[userID]
 	return user, nil
 }
 
-func (db *UserDatabase) create(user *User) (*User, error) {
+func (db *userRepo) create(user *User) (*User, error) {
 	db.users[user.UserID] = user
 	return user, nil
 }
 
-func (db *UserDatabase) update(user *User) (*User, error) {
+func (db *userRepo) update(user *User) (*User, error) {
 	db.users[user.UserID] = user
 	return user, nil
 }

@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	userSrv *user.UserService
-	authSrv *auth.AuthService
+	userSrv user.UserService
+	authSrv auth.AuthService
 )
 
 func main() {

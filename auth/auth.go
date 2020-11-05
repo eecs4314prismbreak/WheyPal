@@ -4,12 +4,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-type AuthService struct {
-	Repo *AuthRepo
+type authService struct {
+	Repo AuthRepo
 }
 
-func NewService() *AuthService {
-	return &AuthService{
+func NewService() AuthService {
+	return &authService{
 		Repo: NewAuthRepo(),
 	}
 }
