@@ -63,8 +63,7 @@ func createUser(c *gin.Context) {
 	err := c.ShouldBind(&message)
 
 	user := &user.User{
-		Name:  message.Name,
-		Email: message.Email,
+		Name: message.Name,
 	}
 
 	userCreated, err := userSrv.Create(user)
@@ -126,20 +125,21 @@ func updateLogin(c *gin.Context) {
 		return
 	}
 
+	//DEPRECIATED: USER PROFILE NO LONGER TRACKS EMAIL
 	//update user profile email too
-	if login.Email != "" {
-		user := &user.User{
-			UserID: idFromToken,
-			Email:  login.Email,
-		}
+	// if login.Email != "" {
+	// 	user := &user.User{
+	// 		UserID: idFromToken,
+	// 		Email:  login.Email,
+	// 	}
 
-		_, err := userSrv.Update(user)
+	// 	_, err := userSrv.Update(user)
 
-		if err != nil {
-			c.JSON(500, fmt.Sprintf("%v", err))
-			return
-		}
-	}
+	// 	if err != nil {
+	// 		c.JSON(500, fmt.Sprintf("%v", err))
+	// 		return
+	// 	}
+	// }
 
 	c.JSON(200, &resp)
 }

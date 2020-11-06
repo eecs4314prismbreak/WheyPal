@@ -40,12 +40,8 @@ func (db *userRepo) create(user *User) (*User, error) {
 func (db *userRepo) update(user *User) (*User, error) {
 	notUpdatedUser, _ := db.users[user.UserID]
 
-	//if a user did not have a name or email specified to update, keep the old one
+	//if a user did not have a name or other detail specified to update, keep the old detail
 	//@Amer, this should be able to be handled through pgx by not updating if it is nil/""
-	if user.Email == "" {
-		user.Email = notUpdatedUser.Email
-	}
-
 	if user.Name == "" {
 		user.Name = notUpdatedUser.Name
 	}
