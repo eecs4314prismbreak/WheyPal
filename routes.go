@@ -126,6 +126,21 @@ func updateLogin(c *gin.Context) {
 		return
 	}
 
+	//update user profile email too
+	if login.Email != "" {
+		user := &user.User{
+			UserID: idFromToken,
+			Email:  login.Email,
+		}
+
+		_, err := userSrv.Update(user)
+
+		if err != nil {
+			c.JSON(500, fmt.Sprintf("%v", err))
+			return
+		}
+	}
+
 	c.JSON(200, &resp)
 }
 
