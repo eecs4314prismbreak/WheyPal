@@ -56,14 +56,21 @@ func createUser(c *gin.Context) {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		Birthday string `json:"birthday"`
+		Location string `json:"location"`
+		Interest string `json:"interest"`
 	}
 
 	var message *CreateMessage
+	// fmt.Println("message", *message)
 
 	err := c.ShouldBind(&message)
 
 	user := &user.User{
-		Name: message.Name,
+		Name:     message.Name,
+		Birthday: message.Birthday,
+		Location: message.Location,
+		Interest: message.Interest,
 	}
 
 	userCreated, err := userSrv.Create(user)
@@ -146,7 +153,10 @@ func updateLogin(c *gin.Context) {
 
 func login(c *gin.Context) {
 	type LoginResponse struct {
-		Name string `json:"name"`
+		Name     string `json:"name"`
+		Birthday string `json:"birthday"`
+		Location string `json:"location"`
+		Interest string `json:"interest"`
 		*auth.AuthResponse
 	}
 
@@ -165,9 +175,12 @@ func login(c *gin.Context) {
 
 	resp := &LoginResponse{
 		Name:         userResponse.Name,
+		Birthday:     userResponse.Birthday,
+		Location:     userResponse.Location,
+		Interest:     userResponse.Interest,
 		AuthResponse: authResponse,
 	}
-
+	// fmt.Println("resp", resp)
 	c.JSON(200, &resp)
 }
 
