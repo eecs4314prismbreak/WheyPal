@@ -22,6 +22,11 @@ func main() {
 		port = "8081"
 	}
 
+	redisAddr := os.Getenv("REDIS")
+	if len(redisAddr) == 0 {
+		redisAddr = "localhost:6379"
+	}
+
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -35,7 +40,7 @@ func main() {
 	}))
 
 	userSrv = user.NewService()
-	authSrv = auth.NewService()
+	authSrv = auth.NewService(redisAddr)
 
 	router.GET("/", homeHandler)
 	router.GET("/user", auth.CheckJWT(), getAllUsers)
