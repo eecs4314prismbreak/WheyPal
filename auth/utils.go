@@ -23,7 +23,7 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 // CreateJWT func will used to create the JWT while signing in and signing out
-func createJWT(userID int) (string, int64, error) {
+func createJWT(userID int) (*StoredToken, error) {
 	// expirationTime := time.Now().Add(7 * 24 * 60 * time.Minute)
 	// expirationTime := time.Now().Add(1 * time.Minute)
 	expirationTime := time.Now().Add(24 * 60 * time.Minute)
@@ -36,10 +36,16 @@ func createJWT(userID int) (string, int64, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtSecretKey)
-	if err == nil {
-		return tokenString, expirationTime.Unix(), nil
+	if err != nil {
+
+		return nil, err
 	}
-	return "", 0, err
+
+	return &StoredToken{
+		Token:  tokenString,
+		Expiry: expirationTime.Unix(),
+	}, nil
+
 }
 
 // VerifyToken func will used to Verify the JWT Token while using APIS
