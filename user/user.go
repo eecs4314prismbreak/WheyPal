@@ -11,8 +11,10 @@ func NewService() UserService {
 }
 
 type User struct {
-	UserID int    `json:"userID"`
-	Name   string `json:"name"`
+	UserID   int    `json:"userID"`
+	Name     string `json:"name"`
+	password string `json:"password"`
+	email    string `json:"email`
 }
 
 type UsersResponse struct {

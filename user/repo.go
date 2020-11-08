@@ -1,27 +1,52 @@
 package user
 
+import (
+	"database/sql"
+	database "github.com/eecs4314prismbreak/WheyPal/database"
+	_ "github.com/lib/pq"
+)
+
 type UserRepo interface {
 	getAllUsers() ([]*User, error)
 	get(int) (*User, error)
 	create(*User) (*User, error)
 	update(*User) (*User, error)
 }
+
 type userRepo struct {
-	users map[int]*User
+	connector *sql.DB
 }
 
-func NewDatabase() UserRepo {
+func NewDatabase(dbname string) UserRepo {
 	return &userRepo{
-		users: make(map[int]*User),
+		connector: database.LoadPGDB(),
 	}
 }
 
 func (db *userRepo) getAllUsers() ([]*User, error) {
-	//s.db.get
 	var userList []*User
-	for _, u := range db.users {
-		userList = append(userList, u)
+	// for _, u := range db.users {
+	// 	userList = append(userList, u)
+	// }
+
+	sqlStatement := `SELECT * FROM users;`
+	rows, err := db.Query(sqlStatement)
+	if err != nil {
+		panic(err)
 	}
+	defer rows.Close()
+
+	cols, _ := rows.Columns()
+	fmt.Printf("Cols: %s", cols)
+
+	for rows.Next() {
+		var u *User
+		if err := rows.Scan(&u.userid, &u.username, &u.password, &u.email); err != nil {
+			panic(err)
+		}
+		append(userList, u)
+	}
+
 	return userList, nil
 }
 

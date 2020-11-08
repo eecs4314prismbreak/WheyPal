@@ -1,4 +1,4 @@
-module user
+module database
 
 go 1.15
 
