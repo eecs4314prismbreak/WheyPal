@@ -22,7 +22,7 @@ func (s *authService) Login(login *LoginRequest) (*AuthResponse, error) {
 	}
 
 	//validate snubmitted password is the retrievedLogin pw
-	validLogin := retrievedLogin.Password == login.Password
+	validLogin := checkPasswordHash(login.Password, retrievedLogin.Password)
 	if !validLogin {
 		return nil, errors.New("invalid login")
 	}
@@ -80,6 +80,7 @@ func (s *authService) ValidateToken(userID int, token string) (*Claims, error) {
 }
 
 func (s *authService) Create(login *Login) (*AuthResponse, error) {
+	login.Password, _ = hashPassword(login.Password)
 	retrievedLogin, err := s.Repo.create(login)
 	if err != nil {
 		return nil, fmt.Errorf("%v --> %s", err, "error creating login")

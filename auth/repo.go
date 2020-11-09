@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,13 +19,13 @@ type AuthRepo interface {
 }
 
 type authRepo struct {
-	LoginRepo map[int]*Login
+	LoginRepo *sql.DB
 	TokenRepo *redis.Client
 }
 
 func NewAuthRepo(redisAddr string) AuthRepo {
 	return &authRepo{
-		LoginRepo: make(map[int]*Login),
+		LoginRepo: LoadPGDB(),
 		TokenRepo: redis.NewClient(&redis.Options{
 			Addr: redisAddr,
 		}),
