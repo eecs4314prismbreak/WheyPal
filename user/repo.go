@@ -3,8 +3,9 @@ package user
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 type UserRepo interface {
@@ -40,7 +41,7 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	// IWAACCT
 	for rows.Next() {
 		u := &User{}
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+		if err := rows.Scan(&u.UserID, &u.Name); err != nil {
 			panic(err)
 		}
 		userList = append(userList, u)
@@ -57,7 +58,7 @@ func (db *userRepo) get(userID int) (*User, error) {
 
 	// IWAACCT
 	u := &User{}
-	if err := row.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+	if err := row.Scan(&u.UserID, &u.Name); err != nil {
 		panic(err)
 		// return nil, err // Can either return error or just panic here
 	}
@@ -72,7 +73,7 @@ func (db *userRepo) create(user *User) (*User, error) {
 	// IWAACCT
 	sqlStatement := `INSERT INTO users(username, password, email)
 	VALUES ($1, $2, $3);`
-	_, err := db.connector.Exec(sqlStatement, user.Name, user.Password, user.Email)
+	_, err := db.connector.Exec(sqlStatement, user.Name)
 
 	if err != nil {
 		panic(err)
@@ -94,25 +95,13 @@ func (db *userRepo) update(user *User) (*User, error) {
 		newUser.Name = user.Name
 	}
 
-	if user.Email == "" {
-		newUser.Email = oldUser.Email
-	} else {
-		newUser.Email = user.Email
-	}
-
-	if user.Password == "" {
-		newUser.Password = oldUser.Password
-	} else {
-		newUser.Password = user.Password
-	}
-
 	// Insert new user into database
 	sqlStatement := `
 	UPDATE users
-	SET username = $1, email=$2, password = $3
+	SET username = $1
 	WHERE id = $4;`
 
-	_, err := db.connector.Exec(sqlStatement, newUser.Name, newUser.Email, newUser.Password, user.UserID)
+	_, err := db.connector.Exec(sqlStatement, newUser.Name, user.UserID)
 	if err != nil {
 		panic(err)
 	}
