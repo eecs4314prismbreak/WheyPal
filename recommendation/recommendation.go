@@ -1,4 +1,4 @@
-package reccomendation
+package recommendation
 
 import "os/user"
 
@@ -23,7 +23,8 @@ type Recommendations struct {
 }
 
 type RecommendationMessage struct {
-	UserID                int                   `json:"userID"`
+	UserID1                int                  `json:"userID1"`
+	UserID2                int                  `json:"userID2"`
 	RecomendationResponse RecomendationResponse `json:"recomendationResponse"`
 }
 
