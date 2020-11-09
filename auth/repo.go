@@ -1,26 +1,33 @@
 package auth
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
+
+	"github.com/go-redis/redis"
 )
 
 type AuthRepo interface {
 	getLogin(string) (*Login, error)
 	update(*Login) (bool, error)
 	create(*Login) (*Login, error)
-	storeToken(int, int64, string) (string, error)
+	storeToken(int, *StoredToken) (*StoredToken, error)
 	retrieveToken(int) (*StoredToken, error)
 }
 
 type authRepo struct {
 	LoginRepo map[int]*Login
-	TokenRepo map[int]*StoredToken
+	TokenRepo *redis.Client
 }
 
-func NewAuthRepo() AuthRepo {
+func NewAuthRepo(redisAddr string) AuthRepo {
 	return &authRepo{
 		LoginRepo: make(map[int]*Login),
-		TokenRepo: make(map[int]*StoredToken),
+		TokenRepo: redis.NewClient(&redis.Options{
+			Addr: redisAddr,
+		}),
 	}
 }
 
@@ -47,19 +54,27 @@ func (r *authRepo) create(login *Login) (*Login, error) {
 	return login, nil
 }
 
-func (r *authRepo) storeToken(userID int, expiry int64, jwt string) (string, error) {
-	r.TokenRepo[userID] = &StoredToken{
-		Token:  jwt,
-		Expiry: expiry,
+func (r *authRepo) storeToken(userID int, jwt *StoredToken) (*StoredToken, error) {
+	expiry := time.Duration((jwt.Expiry - time.Now().Unix()) * 1000000)
+	if _, err := r.TokenRepo.HSetNX(string(userID), "token", jwt).Result(); err != nil {
+		return nil, fmt.Errorf("create: redis error: %w", err)
 	}
-
+	r.TokenRepo.Expire(string(userID), expiry)
 	return jwt, nil
 }
 
 func (r *authRepo) retrieveToken(userID int) (*StoredToken, error) {
-	jwt, ok := r.TokenRepo[userID]
-	if !ok {
+	jwt, err := r.TokenRepo.HGet(string(userID), "hoket").Result()
+	if err == redis.Nil || err != nil {
 		return nil, errors.New("Could not find or retireve token")
+
 	}
-	return jwt, nil
+
+	retrievedToken := &StoredToken{}
+
+	if err := json.Unmarshal([]byte(jwt), &retrievedToken); err != nil {
+		return nil, err
+	}
+
+	return retrievedToken, nil
 }

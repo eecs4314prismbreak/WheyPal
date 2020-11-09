@@ -13,8 +13,9 @@ func NewService() UserService {
 type User struct {
 	UserID   int    `json:"userID"`
 	Name     string `json:"name"`
-	Password string `json:"password"`
-	Email    string `json:"email`
+	Birthday string `json:"birthday"`
+	Location string `json:"location"`
+	Interest string `json:"interest"`
 }
 
 type UsersResponse struct {

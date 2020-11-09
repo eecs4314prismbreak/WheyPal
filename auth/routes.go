@@ -115,20 +115,15 @@ func (s *authService) Update(userID int, loginRequest *LoginRequest) (bool, erro
 }
 
 func (s *authService) generateToken(userID int) (*StoredToken, error) {
-	generatedToken, expiry, err := createJWT(userID)
+	generatedToken, err := createJWT(userID)
 	if err != nil {
 		return nil, fmt.Errorf("%v --> %s", err, "error generating token")
 	}
 
-	_, err = s.Repo.storeToken(userID, expiry, generatedToken)
+	_, err = s.Repo.storeToken(userID, generatedToken)
 	if err != nil {
 		return nil, fmt.Errorf("%v --> %s", err, "error storing token")
 	}
 
-	token := &StoredToken{
-		Token:  generatedToken,
-		Expiry: expiry,
-	}
-
-	return token, nil
+	return generatedToken, nil
 }

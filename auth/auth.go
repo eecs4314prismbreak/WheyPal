@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"encoding/json"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -8,9 +10,9 @@ type authService struct {
 	Repo AuthRepo
 }
 
-func NewService() AuthService {
+func NewService(redisAddr string) AuthService {
 	return &authService{
-		Repo: NewAuthRepo(),
+		Repo: NewAuthRepo(redisAddr),
 	}
 }
 
@@ -44,4 +46,8 @@ type AuthRequest struct {
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+func (t *StoredToken) MarshalBinary() ([]byte, error) {
+	return json.Marshal(t)
 }
