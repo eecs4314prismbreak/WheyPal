@@ -2,8 +2,9 @@ package user
 
 import (
 	"database/sql"
-	database "github.com/eecs4314prismbreak/WheyPal/database"
+	"fmt"
 	_ "github.com/lib/pq"
+	"strings"
 )
 
 type UserRepo interface {
@@ -17,34 +18,32 @@ type userRepo struct {
 	connector *sql.DB
 }
 
-func NewDatabase(dbname string) UserRepo {
+func NewDatabase() UserRepo {
 	return &userRepo{
-		connector: database.LoadPGDB(),
+		connector: LoadPGDB(),
 	}
 }
 
 func (db *userRepo) getAllUsers() ([]*User, error) {
 	var userList []*User
-	// for _, u := range db.users {
-	// 	userList = append(userList, u)
-	// }
 
 	sqlStatement := `SELECT * FROM users;`
-	rows, err := db.Query(sqlStatement)
+	rows, err := db.connector.Query(sqlStatement)
+
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 
 	cols, _ := rows.Columns()
-	fmt.Printf("Cols: %s", cols)
-
+	fmt.Printf("COLS: %s", strings.Join(cols, " "))
+	// IWAACCT
 	for rows.Next() {
-		var u *User
-		if err := rows.Scan(&u.userid, &u.username, &u.password, &u.email); err != nil {
+		u := &User{}
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
 			panic(err)
 		}
-		append(userList, u)
+		userList = append(userList, u)
 	}
 
 	return userList, nil
@@ -52,25 +51,70 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 
 func (db *userRepo) get(userID int) (*User, error) {
 	//s.db.get
-	var user *User
-	user = db.users[userID]
-	return user, nil
+
+	sqlStatement := `SELECT * FROM users WHERE userid=$1;`
+	row := db.connector.QueryRow(sqlStatement, userID)
+
+	// IWAACCT
+	u := &User{}
+	if err := row.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+		panic(err)
+		// return nil, err // Can either return error or just panic here
+	}
+
+	return u, nil
 }
 
+// Why are we returning the same user we just created?
 func (db *userRepo) create(user *User) (*User, error) {
-	db.users[user.UserID] = user
+	//s.db.get
+
+	// IWAACCT
+	sqlStatement := `INSERT INTO users(username, password, email)
+	VALUES ($1, $2, $3);`
+	_, err := db.connector.Exec(sqlStatement, user.Name, user.Password, user.Email)
+
+	if err != nil {
+		panic(err)
+		// return nil, err // Can either return error or just panic here
+	}
+
 	return user, nil
 }
 
 func (db *userRepo) update(user *User) (*User, error) {
-	notUpdatedUser, _ := db.users[user.UserID]
+	// IWAACCT
 
-	//if a user did not have a name or other detail specified to update, keep the old detail
-	//@Amer, this should be able to be handled through pgx by not updating if it is nil/""
+	oldUser, _ := db.get(user.UserID)
+	newUser := &User{}
+
 	if user.Name == "" {
-		user.Name = notUpdatedUser.Name
+		newUser.Name = oldUser.Name
+	} else {
+		newUser.Name = user.Name
 	}
 
-	db.users[user.UserID] = user
+	if user.Email == "" {
+		newUser.Email = oldUser.Email
+	} else {
+		newUser.Email = user.Email
+	}
+
+	if user.Password == "" {
+		newUser.Password = oldUser.Password
+	} else {
+		newUser.Password = user.Password
+	}
+
+	// Insert new user into database
+	sqlStatement := `
+	UPDATE users
+	SET username = $1, email=$2, password = $3
+	WHERE id = $4;`
+
+	_, err := db.connector.Exec(sqlStatement, newUser.Name, newUser.Email, newUser.Password, user.UserID)
+	if err != nil {
+		panic(err)
+	}
 	return user, nil
 }

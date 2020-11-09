@@ -1,4 +1,4 @@
-package database
+package user
 
 import (
 	"database/sql"
@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	dbCredFile = "db_credentials"
+	dbCredFile = "user/db_credentials"
 )
 
 func initConfig() {
