@@ -15,7 +15,7 @@ CREATE TABLE location (locationId SERIAL PRIMARY KEY, city VARCHAR(100) NOT NULL
 CREATE TABLE matchRequest (matchRequestId SERIAL PRIMARY KEY, status VARCHAR(20) NOT NULL,
 	userA SERIAL REFERENCES users(userId) ON DELETE CASCADE, userB SERIAL REFERENCES users(userId) ON DELETE CASCADE,
 	CHECK (userA <> userB), CHECK (status = 'accepted' OR status = 'declined' OR status = 'pendingUserA' OR status = 'pendingUserB'));
-CREATE TABLE profile (userId SERIAL REFERENCES users(userId) ON DELETE CASCADE, gender CHAR(1) NOT NULL, availability BOOLEAN NOT NULL, 
+CREATE TABLE profile (userId SERIAL REFERENCES users(userId) ON DELETE CASCADE,locationId SERIAL REFERENCES location(locationId) ON DELETE CASCADE, gender CHAR(1) NOT NULL, availability BOOLEAN NOT NULL, 
 	birthDate DATE NOT NULL, firstName VARCHAR(50), lastName VARCHAR(50), profileDescription VARCHAR(10000),
 	PRIMARY KEY (userId), CHECK (gender = 'M' OR gender = 'F' OR gender = 'X'));
 CREATE TABLE notification (userId SERIAL REFERENCES users(userId) ON DELETE CASCADE, matchRequest BOOLEAN NOT NULL,
