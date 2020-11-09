@@ -5,15 +5,16 @@ import (
 	"time"
 
 	auth "github.com/eecs4314prismbreak/WheyPal/auth"
+	rec "github.com/eecs4314prismbreak/WheyPal/recommendation"
 	user "github.com/eecs4314prismbreak/WheyPal/user"
 	"github.com/gin-contrib/cors"
-
 	"github.com/gin-gonic/gin"
 )
 
 var (
 	userSrv user.UserService
 	authSrv auth.AuthService
+	recSrv  rec.RecommendationService
 )
 
 func main() {
@@ -41,6 +42,7 @@ func main() {
 
 	userSrv = user.NewService()
 	authSrv = auth.NewService(redisAddr)
+	recSrv = rec.NewService()
 
 	router.GET("/", homeHandler)
 	router.GET("/user", auth.CheckJWT(), getAllUsers)
@@ -50,6 +52,7 @@ func main() {
 	router.POST("/login", login)
 	router.PUT("/login", auth.CheckJWT(), updateLogin)
 	router.POST("/auth", auth.CheckJWT(), validate)
+	router.GET("/recommend", auth.CheckJWT(), recommend)
 
 	router.Run(":" + port)
 }

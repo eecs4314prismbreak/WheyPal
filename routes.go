@@ -1,14 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 
 	auth "github.com/eecs4314prismbreak/WheyPal/auth"
+	rec "github.com/eecs4314prismbreak/WheyPal/recommendation"
 	user "github.com/eecs4314prismbreak/WheyPal/user"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{}
 
 // the '/' endpoint
 func homeHandler(c *gin.Context) {
@@ -197,4 +203,40 @@ func validate(c *gin.Context) {
 	}
 
 	c.JSON(200, &resp)
+}
+
+func recommend(c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	defer conn.Close()
+	var recommenaditonMessage *rec.RecommendationMessage
+	var recommenaditonResponse rec.RecomendationResponse
+	for {
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+		// log.Printf("recv: %s", message)
+
+		err = json.Unmarshal(message, recommenaditonMessage)
+		if err != nil {
+			log.Println("Could not unmashall recommendation:", err)
+			break
+		}
+		// log.Printf("recv: %s", message)
+
+		recommenaditonResponse, err = recSrv.HandleRecommenatdonResponse(recommenaditonMessage)
+
+		response, err := json.Marshal(recommenaditonResponse)
+
+		err = conn.WriteMessage(mt, response)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+	}
 }
