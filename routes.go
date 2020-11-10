@@ -65,6 +65,10 @@ func createUser(c *gin.Context) {
 	// fmt.Println("message", *message)
 
 	err := c.ShouldBind(&message)
+	if err != nil {
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
 
 	user := &user.User{
 		Name:     message.Name,
@@ -74,11 +78,11 @@ func createUser(c *gin.Context) {
 	}
 
 	userCreated, err := userSrv.Create(user)
-
 	if err != nil {
 		c.JSON(500, fmt.Sprintf("%v", err))
 		return
 	}
+	fmt.Printf("IN THE THING: %v\n", user)
 
 	login := &auth.Login{
 		UserID:   userCreated.UserID,
@@ -162,7 +166,11 @@ func login(c *gin.Context) {
 
 	var login *auth.LoginRequest
 
-	c.ShouldBind(&login)
+	err := c.ShouldBind(&login)
+	if err != nil {
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
 
 	authResponse, err := authSrv.Login(login)
 

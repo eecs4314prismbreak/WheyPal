@@ -35,13 +35,17 @@ func NewAuthRepo(redisAddr string) AuthRepo {
 //database actions
 
 func (r *authRepo) getLogin(email string) (*Login, error) {
+
+	if email == "" {
+		return nil, errors.New("EMAIL NULL")
+	}
 	sqlStatement := `SELECT * FROM logins WHERE email=$1;`
 	row := r.LoginRepo.QueryRow(sqlStatement, email)
 
 	// IWAACCT
 	l := &Login{}
 	if err := row.Scan(&l.UserID, &l.Email, &l.Password); err != nil {
-		return nil, errors.New("Could not find or retirieve user of given email")
+		return nil, errors.New("Could not find or retrieve user of given email")
 	}
 	return l, nil
 }
@@ -89,8 +93,8 @@ func (r *authRepo) update(login *Login) (bool, error) {
 }
 
 func (r *authRepo) create(login *Login) (*Login, error) {
-	sqlStatement := `INSERT INTO logins(email, hashedPass) VALUES ($1, $2);;`
-	_, err := r.LoginRepo.Exec(sqlStatement, login.Email, login.Password)
+	sqlStatement := `INSERT INTO logins(userid, email, hashedPass) VALUES ($1, $2, $3);;`
+	_, err := r.LoginRepo.Exec(sqlStatement, login.UserID, login.Email, login.Password)
 
 	if err != nil {
 		return nil, err

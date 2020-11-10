@@ -16,6 +16,7 @@ type AuthService interface {
 
 func (s *authService) Login(login *LoginRequest) (*AuthResponse, error) {
 	//find user based on email
+	fmt.Printf("EMAIL = %s\n", login.Email)
 	retrievedLogin, err := s.Repo.getLogin(login.Email)
 	if err != nil {
 		return nil, fmt.Errorf("%v --> %s", err, "error retrieving login")
@@ -83,7 +84,7 @@ func (s *authService) Create(login *Login) (*AuthResponse, error) {
 	login.Password, _ = hashPassword(login.Password)
 	retrievedLogin, err := s.Repo.create(login)
 	if err != nil {
-		return nil, fmt.Errorf("%v --> %s", err, "error creating login")
+		return nil, fmt.Errorf("%v --> %s", err, "error creating login for userid"+fmt.Sprint(login.UserID))
 	}
 
 	tokenToStore, err := s.generateToken(login.UserID)
