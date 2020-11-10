@@ -35,23 +35,67 @@ func NewAuthRepo(redisAddr string) AuthRepo {
 //database actions
 
 func (r *authRepo) getLogin(email string) (*Login, error) {
-	for userID, login := range r.LoginRepo {
-		if login.Email == email {
-			return r.LoginRepo[userID], nil
-		}
-	}
+	sqlStatement := `SELECT * FROM logins WHERE email=$1;`
+	row := r.LoginRepo.QueryRow(sqlStatement, email)
 
-	return nil, errors.New("Could not find or retirieve user of given email")
+	// IWAACCT
+	l := &Login{}
+	if err := row.Scan(&l.UserID, &l.Email, &l.Password); err != nil {
+		return nil, errors.New("Could not find or retirieve user of given email")
+	}
+	return l, nil
+}
+
+func (r *authRepo) getLoginFromID(userID int) (*Login, error) {
+	sqlStatement := `SELECT * FROM logins WHERE userId=$1;`
+	row := r.LoginRepo.QueryRow(sqlStatement, userID)
+
+	// IWAACCT
+	l := &Login{}
+	if err := row.Scan(&l.UserID, &l.Email, &l.Password); err != nil {
+		return nil, errors.New("Could not find or retirieve user of given userID")
+	}
+	return l, nil
 }
 
 func (r *authRepo) update(login *Login) (bool, error) {
-	r.LoginRepo[login.UserID] = login
+	oldLogin, _ := r.getLoginFromID(login.UserID)
+	newLogin := &Login{}
+
+	if login.Email == "" {
+		newLogin.Email = oldLogin.Email
+	} else {
+		newLogin.Email = login.Email
+	}
+
+	if login.Password == "" {
+		newLogin.Password = oldLogin.Password
+	} else {
+		newLogin.Password = login.Password
+	}
+
+	// Insert new user into database
+	sqlStatement := `
+		UPDATE logins
+		SET email=$1, password = $2
+		WHERE id = $3;`
+
+	_, err := r.LoginRepo.Exec(sqlStatement, newLogin.Email, newLogin.Password, login.UserID)
+
+	if err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
 func (r *authRepo) create(login *Login) (*Login, error) {
-	// fmt.Println("Login being created | ", login.Email)
-	r.LoginRepo[login.UserID] = login
+	sqlStatement := `INSERT INTO logins(email, hashedPass) VALUES ($1, $2);;`
+	_, err := r.LoginRepo.Exec(sqlStatement, login.Email, login.Password)
+
+	if err != nil {
+		return nil, err
+		// return nil, err // Can either return error or just panic here
+	}
 	return login, nil
 }
 
