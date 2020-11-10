@@ -1,8 +1,8 @@
 package recommendation
 
 import (
-	"os/user"
 	"database/sql"
+	"os/user"
 )
 
 type RecommendationRepo interface {
@@ -13,7 +13,7 @@ type RecommendationRepo interface {
 }
 
 type recommendationRepo struct {
-		connector *sql.DB
+	connector *sql.DB
 }
 
 func NewDatabase() RecommendationRepo {
@@ -22,7 +22,7 @@ func NewDatabase() RecommendationRepo {
 	}
 }
 
-func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error) {
+func (r *recommendationRepo) getRecommendations(userID, targetUserID int) ([]*user.User, error) {
 	// Returns the list of user
 
 	var userList []*user.User
@@ -39,14 +39,18 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 			p.availability = true
 		;
 	`
-	query, err := db.connector.Exec(sqlStatement, "pendingUserB", userId, targetUserID)
-	if err != nil {panic(err)}
+	query, err := r.connector.Exec(sqlStatement, "pendingUserB", userID, targetUserID)
+	if err != nil {
+		panic(err)
+	}
 
 	defer query.Close()
 
 	for query.Next() {
 		u := &user.User{}
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {panic(err)}
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+			panic(err)
+		}
 		userList := append(userList, u)
 	}
 
@@ -57,9 +61,9 @@ func (r *recommendationRepo) monoMatch(userID, targetUserID int) error {
 	// TODO, need to refactor what this does
 
 	// sqlStatement := `
-	// 	INSERT INTO 
+	// 	INSERT INTO
 	// 		matchrequest( status, usera, userb )
-	// 	VALUES 
+	// 	VALUES
 	// 		( $1, $2, $3 )
 	// 	;
 	// `
@@ -72,10 +76,10 @@ func (r *recommendationRepo) monoMatch(userID, targetUserID int) error {
 }
 
 func (r *recommendationRepo) deleteMonoMatch(userID, targetUserID int) error {
-	// TODO, may not even need it 
+	// TODO, may not even need it
 
 	// sqlStatement := `
-	// 	DELETE FROM 
+	// 	DELETE FROM
 	// 		matchrequest
 	// 	WEHRE
 	// 		usera = $1 AND

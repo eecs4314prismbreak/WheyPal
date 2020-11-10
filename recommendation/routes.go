@@ -1,13 +1,15 @@
 package recommendation
 
+import "os/user"
+
 type RecommendationService interface {
 	HandleRecommenatdonResponse(*RecommendationMessage) (RecomendationResponse, error)
 	GetRecommendations(userID int) ([]*user.User, error)
 }
 
-func (s *recommendationService) GetRecommendations(userID int) ([]*user.User, error){
-	userList, err := s.db.getRecommendations(userId)
-	
+func (s *recommendationService) GetRecommendations(userID int) ([]*user.User, error) {
+	userList, err := s.db.getRecommendations(userID)
+
 	return userList, nil
 }
 
@@ -20,15 +22,15 @@ func (s *recommendationService) HandleRecommenatdonResponse(msg *RecommendationM
 	//
 	// If both user and targetuser have monomatches against each other,
 	// 1. check if either of them declined another. Then just remove both matches
-	// 2. if both sent positive response, (users' matchrequest.status against targetuser = "pendingUserB" && 
+	// 2. if both sent positive response, (users' matchrequest.status against targetuser = "pendingUserB" &&
 	//									   targetuser's matchrequest.status against user = "pendingUserB")
 	//    then remove both response and insert a new one with usera & userb & status= "accepted"
-	
+
 	userid := msg.UserID1
 	targetid := msg.UserID2
 	response := msg.RecomendationResponse
 
-	if response = PositiveResponse {
+	if response == PositiveResponse {
 		// TODO: Deal with positive response
 	} else {
 		// TODO: Deal with negative response
@@ -39,5 +41,3 @@ func (s *recommendationService) HandleRecommenatdonResponse(msg *RecommendationM
 	//2 means negathive response (left swipe)
 	return msg.RecomendationResponse, nil
 }
-
-	
