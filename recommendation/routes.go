@@ -1,6 +1,9 @@
 package recommendation
 
-import "os/user"
+import (
+	"log"
+	"os/user"
+)
 
 type RecommendationService interface {
 	HandleRecommenatdonResponse(*RecommendationMessage) (RecomendationResponse, error)
@@ -9,6 +12,10 @@ type RecommendationService interface {
 
 func (s *recommendationService) GetRecommendations(userID int) ([]*user.User, error) {
 	userList, err := s.db.getRecommendations(userID)
+	if err != nil {
+		log.Printf("%v", err)
+		return nil, err
+	}
 
 	return userList, nil
 }
@@ -26,8 +33,8 @@ func (s *recommendationService) HandleRecommenatdonResponse(msg *RecommendationM
 	//									   targetuser's matchrequest.status against user = "pendingUserB")
 	//    then remove both response and insert a new one with usera & userb & status= "accepted"
 
-	userid := msg.UserID1
-	targetid := msg.UserID2
+	// userid := msg.UserID1
+	// targetid := msg.UserID2
 	response := msg.RecomendationResponse
 
 	if response == PositiveResponse {

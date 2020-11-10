@@ -3,6 +3,8 @@ package recommendation
 import (
 	"database/sql"
 	"os/user"
+
+	_ "github.com/lib/pq"
 )
 
 type RecommendationRepo interface {
@@ -22,37 +24,35 @@ func NewDatabase() RecommendationRepo {
 	}
 }
 
-func (r *recommendationRepo) getRecommendations(userID, targetUserID int) ([]*user.User, error) {
+func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error) {
 	// Returns the list of user
 
 	var userList []*user.User
 
-	sqlStatement := `
-		SELECT 
-			u.userid, u.username, u.password, u.email 
-		FROM
-			interest i 
-				INNER JOIN userinterest ui ON i.interestid = ui.interestid
-				INNER JOIN profile p ON p.userid = ui.userid
-				INNER JOIN users u ON u.userid = ui.userid
-		WHERE
-			p.availability = true
-		;
-	`
-	query, err := r.connector.Exec(sqlStatement, "pendingUserB", userID, targetUserID)
-	if err != nil {
-		panic(err)
-	}
+	// sqlStatement := `
+	// 	SELECT
+	// 		u.userid, u.username, u.email
+	// 	FROM
+	// 		interest i
+	// 			INNER JOIN userinterest ui ON i.interestid = ui.interestid
+	// 			INNER JOIN profile p ON p.userid = ui.userid
+	// 			INNER JOIN users u ON u.userid = ui.userid
+	// 	WHERE
+	// 		p.availability = true
+	// 	;
+	// `
+	// query, err := r.connector.Exec(sqlStatement, "pendingUserB", userID)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	defer query.Close()
-
-	for query.Next() {
-		u := &user.User{}
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
-			panic(err)
-		}
-		userList := append(userList, u)
-	}
+	// for query.Next() {
+	// 	u := &user.User{}
+	// 	if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+	// 		panic(err)
+	// 	}
+	// 	userList := append(userList, u)
+	// }
 
 	return userList, nil
 }
