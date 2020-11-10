@@ -13,7 +13,11 @@ func (s *userService) Create(user *User) (*User, error) {
 	//user given random id lol
 	user.UserID = rand.Intn(100000) + 1000000
 
-	resp, _ := s.db.create(user)
+	resp, err := s.db.create(user)
+	if err != nil {
+		return nil, err
+	}
+
 	return resp, nil
 }
 
