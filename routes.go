@@ -214,6 +214,7 @@ func validate(c *gin.Context) {
 }
 
 func recommend(c *gin.Context) {
+	idFromToken := c.GetInt("userID")
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -222,6 +223,22 @@ func recommend(c *gin.Context) {
 	defer conn.Close()
 	var recommenaditonMessage *rec.RecommendationMessage
 	var recommenaditonResponse rec.RecomendationResponse
+	var recs []*user.User
+	count := 0
+
+	recs, err = recSrv.GetRecommendations(idFromToken)
+	if err != nil {
+		log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
+		return
+	}
+	recMsg, _ := json.Marshal(recs)
+
+	err = conn.WriteMessage(1, recMsg)
+	if err != nil {
+		log.Println("write:", err)
+		return
+	}
+
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
@@ -232,19 +249,36 @@ func recommend(c *gin.Context) {
 
 		err = json.Unmarshal(message, recommenaditonMessage)
 		if err != nil {
-			log.Println("Could not unmashall recommendation:", err)
+			log.Printf("Could not unmashall recommendation: %v", err)
 			break
 		}
 		// log.Printf("recv: %s", message)
 
 		recommenaditonResponse, err = recSrv.HandleRecommenatdonResponse(recommenaditonMessage)
 
-		response, err := json.Marshal(recommenaditonResponse)
+		response, _ := json.Marshal(recommenaditonResponse)
 
 		err = conn.WriteMessage(mt, response)
 		if err != nil {
 			log.Println("write:", err)
 			break
+		}
+		count++
+
+		if count == 10 {
+			count = 0
+			recs, err = recSrv.GetRecommendations(idFromToken)
+			if err != nil {
+				log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
+				return
+			}
+			recMsg, _ := json.Marshal(recs)
+
+			err = conn.WriteMessage(mt, recMsg)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
 		}
 	}
 }
