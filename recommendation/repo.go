@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os/user"
 
+	"github.com/eecs4314prismbreak/WheyPal/user"
 	_ "github.com/lib/pq"
 )
 
@@ -25,34 +26,34 @@ func NewDatabase() RecommendationRepo {
 }
 
 func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error) {
-	// Returns the list of user
+	// Returns the list of Recommendations
 
 	var userList []*user.User
 
-	// sqlStatement := `
-	// 	SELECT
-	// 		u.userid, u.username, u.email
-	// 	FROM
-	// 		interest i
-	// 			INNER JOIN userinterest ui ON i.interestid = ui.interestid
-	// 			INNER JOIN profile p ON p.userid = ui.userid
-	// 			INNER JOIN users u ON u.userid = ui.userid
-	// 	WHERE
-	// 		p.availability = true
-	// 	;
-	// `
-	// query, err := r.connector.Exec(sqlStatement, "pendingUserB", userID)
-	// if err != nil {
-	// 	panic(err)
-	// }
+	sqlStatement := `
+		SELECT
+			u.userid, u.username, u.email
+		FROM
+			interest i
+				INNER JOIN userinterest ui ON i.interestid = ui.interestid
+				INNER JOIN profile p ON p.userid = ui.userid
+				INNER JOIN users u ON u.userid = ui.userid
+		WHERE
+			p.availability = true
+		;
+	`
+	rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
+	if err != nil {
+		panic(err)
+	}
 
-	// for query.Next() {
-	// 	u := &user.User{}
-	// 	if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
-	// 		panic(err)
-	// 	}
-	// 	userList := append(userList, u)
-	// }
+	for rows.Next() {
+		u := &user.User{}
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+			panic(err)
+		}
+		userList := append(userList, u)
+	}
 
 	return userList, nil
 }
@@ -60,18 +61,19 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 func (r *recommendationRepo) monoMatch(userID, targetUserID int) error {
 	// TODO, need to refactor what this does
 
-	// sqlStatement := `
-	// 	INSERT INTO
-	// 		matchrequest( status, usera, userb )
-	// 	VALUES
-	// 		( $1, $2, $3 )
-	// 	;
-	// `
-	// _, err := db.connector.Exec(sqlStatement, "pendingUserB", userId, targetUserID)
+	sqlStatement := `
+		INSERT INTO
+			matchrequest( status, usera, userb )
+		VALUES
+			( $1, $2, $3 )
+		;
+	`
+	_, err := r.connector.Exec(sqlStatement, "pendingUserB", userID, targetUserID)
 
-	// if err != nil {panic(err)}
+	if err != nil {
+		return err
+	}
 
-	// return err
 	return nil
 }
 
