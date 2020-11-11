@@ -2,7 +2,6 @@ package recommendation
 
 import (
 	"database/sql"
-	"os/user"
 
 	"github.com/eecs4314prismbreak/WheyPal/user"
 	_ "github.com/lib/pq"
@@ -49,10 +48,11 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 
 	for rows.Next() {
 		u := &user.User{}
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Password, &u.Email); err != nil {
+		//11NOV @AMER make sure this here is correct
+		if err := rows.Scan(&u.UserID, &u.Name); err != nil {
 			panic(err)
 		}
-		userList := append(userList, u)
+		userList = append(userList, u)
 	}
 
 	return userList, nil

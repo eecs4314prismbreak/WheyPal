@@ -2,7 +2,8 @@ package recommendation
 
 import (
 	"log"
-	"os/user"
+
+	"github.com/eecs4314prismbreak/WheyPal/user"
 )
 
 type RecommendationService interface {
