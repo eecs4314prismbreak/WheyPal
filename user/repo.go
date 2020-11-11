@@ -123,11 +123,11 @@ func (db *userRepo) update(user *User) (*User, error) {
 	sqlStatement := `
 	UPDATE users
 	SET username = $1, birthday=$2, location=$3, interest=$4
-	WHERE id = $5;`
+	WHERE userID = $5;`
 
 	_, err = db.connector.Exec(sqlStatement, newUser.Name, newUser.Birthday, newUser.Location, newUser.Interest, user.UserID)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return user, nil
 }

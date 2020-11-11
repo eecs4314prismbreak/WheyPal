@@ -1,7 +1,5 @@
 package user
 
-import "math/rand"
-
 type UserService interface {
 	Create(*User) (*User, error)
 	Update(*User) (*User, error)

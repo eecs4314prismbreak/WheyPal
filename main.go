@@ -42,23 +42,14 @@ func main() {
 	userSrv = user.NewService()
 	authSrv = auth.NewService(redisAddr)
 
-	// router.GET("/", homeHandler)
-	// router.GET("/user", auth.CheckJWT(), getAllUsers)
-	// router.GET("/user/:id", auth.CheckJWT(), getUser)
-	// router.PUT("/user", auth.CheckJWT(), updateUser)
-	// router.POST("/user", createUser)
-	// router.POST("/login", login)
-	// router.PUT("/login", auth.CheckJWT(), updateLogin)
-	// router.POST("/auth", auth.CheckJWT(), validate)
-
 	router.GET("/", homeHandler)
-	router.GET("/user", getAllUsers)
-	router.GET("/user/:id", getUser)
-	router.PUT("/user", updateUser)
+	router.GET("/user", auth.CheckJWT(), getAllUsers)
+	router.GET("/user/:id", auth.CheckJWT(), getUser)
+	router.PUT("/user", auth.CheckJWT(), updateUser)
 	router.POST("/user", createUser)
 	router.POST("/login", login)
-	router.PUT("/login", updateLogin)
-	router.POST("/auth", validate)
+	router.PUT("/login", auth.CheckJWT(), updateLogin)
+	router.POST("/auth", auth.CheckJWT(), validate)
 
 	router.Run(":" + port)
 }
