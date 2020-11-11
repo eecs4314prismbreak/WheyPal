@@ -31,7 +31,7 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 
 	sqlStatement := `
 		SELECT
-			u.userid, u.username, u.email
+			u.userid, u.username, u.birthday, u.location, u.interest
 		FROM
 			interest i
 				INNER JOIN userinterest ui ON i.interestid = ui.interestid
@@ -49,7 +49,7 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 	for rows.Next() {
 		u := &user.User{}
 		//11NOV @AMER make sure this here is correct
-		if err := rows.Scan(&u.UserID, &u.Name); err != nil {
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
 			panic(err)
 		}
 		userList = append(userList, u)
