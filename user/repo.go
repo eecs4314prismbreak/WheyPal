@@ -34,7 +34,7 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	cols, _ := rows.Columns()
+	// cols, _ := rows.Columns()
 	// fmt.Printf("COLS: %s", strings.Join(cols, " "))
 
 	for rows.Next() {
