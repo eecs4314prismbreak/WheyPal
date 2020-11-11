@@ -218,24 +218,51 @@ func validate(c *gin.Context) {
 }
 
 func recommend(c *gin.Context) {
-	idFromToken := c.GetInt("userID")
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
 	defer conn.Close()
+
+	// var jwt string
+
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Println("read token:", err)
+		return
+	}
+
+	// err = json.Unmarshal(message, jwt)
+	// if err != nil {
+	// 	log.Println("unmarshall jwToken:", err)
+	// 	return
+	// }
+
+	claims, _ := auth.ClaimsFromToken(string(message))
+	userID := claims.UserID
+
 	var recommenaditonMessage *rec.RecommendationMessage
 	var recommenaditonResponse rec.RecomendationResponse
 	var recs []*user.User
 	count := 0
 
-	recs, err = recSrv.GetRecommendations(idFromToken)
+	recs, err = recSrv.GetRecommendations(userID)
 	if err != nil {
 		log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
 		return
 	}
+
+	// testUser := &user.User{
+	// 	UserID: 1,
+	// 	Name:   "Allen",
+	// }
+
+	// recs = []*user.User{testUser}
+
 	recMsg, _ := json.Marshal(recs)
+	log.Printf("SENDING RECS TO USER | %v", string(recMsg))
 
 	err = conn.WriteMessage(1, recMsg)
 	if err != nil {
@@ -271,7 +298,7 @@ func recommend(c *gin.Context) {
 
 		if count == 10 {
 			count = 0
-			recs, err = recSrv.GetRecommendations(idFromToken)
+			recs, err = recSrv.GetRecommendations(userID)
 			if err != nil {
 				log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
 				return
