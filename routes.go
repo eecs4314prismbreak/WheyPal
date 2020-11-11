@@ -296,7 +296,7 @@ func recommend(c *gin.Context) {
 		}
 		count++
 
-		if count == 10 {
+		if count == len(recs) {
 			count = 0
 			recs, err = recSrv.GetRecommendations(userID)
 			if err != nil {
