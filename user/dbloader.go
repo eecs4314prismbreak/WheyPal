@@ -3,9 +3,10 @@ package user
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
-	"log"
 )
 
 const (
@@ -45,7 +46,7 @@ func LoadPGDB() *sql.DB {
 	if err != nil {
 		panic(err)
 	} else {
-		log.Printf("Database Connection Successful\n")
+		log.Printf("User Database Connection Successful\n")
 	}
 	return db
 }

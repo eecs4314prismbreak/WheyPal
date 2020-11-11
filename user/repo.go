@@ -2,8 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
-	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -37,7 +35,7 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	defer rows.Close()
 
 	cols, _ := rows.Columns()
-	fmt.Printf("COLS: %s", strings.Join(cols, " "))
+	// fmt.Printf("COLS: %s", strings.Join(cols, " "))
 
 	for rows.Next() {
 		u := &User{}
