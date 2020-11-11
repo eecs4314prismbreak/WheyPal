@@ -68,9 +68,14 @@ func (db *userRepo) get(userID int) (*User, error) {
 func (db *userRepo) create(user *User) (*User, error) {
 
 	// IWAACCT
-	sqlStatement := `INSERT INTO users(userid, username, birthday, location, interest)
-	VALUES ($1, $2, $3, $4, $5);`
-	_, err := db.connector.Exec(sqlStatement, user.UserID, user.Name, user.Birthday, user.Location, user.Interest)
+	sqlStatement := `INSERT INTO users(username, birthday, location, interest)
+	VALUES ($1, $2, $3, $4) RETURNING userid;`
+
+	lastInsertID := 0
+	err := db.connector.QueryRow(sqlStatement, user.Name, user.Birthday, user.Location, user.Interest).Scan(&lastInsertID)
+
+	// Put ID into the user
+	user.UserID = lastInsertID
 
 	if err != nil {
 		return nil, err
