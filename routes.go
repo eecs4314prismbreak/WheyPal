@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	auth "github.com/eecs4314prismbreak/WheyPal/auth"
@@ -14,7 +15,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	//fix for specific origin later
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
 
 // the '/' endpoint
 func homeHandler(c *gin.Context) {
