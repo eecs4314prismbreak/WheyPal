@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	dbCredFile = "user/db_credentials"
+	dbCredFile = "auth/db_credentials"
 )
 
 func initConfig() {
@@ -46,7 +46,7 @@ func LoadPGDB() *sql.DB {
 	if err != nil {
 		panic(err)
 	} else {
-		log.Printf("User Database Connection Successful\n")
+		log.Printf("Auth Database Connection Successful\n")
 	}
 	return db
 }

@@ -2,8 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
-	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -36,12 +34,12 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	cols, _ := rows.Columns()
-	fmt.Printf("COLS: %s", strings.Join(cols, " "))
-	// IWAACCT
+	// cols, _ := rows.Columns()
+	// fmt.Printf("COLS: %s", strings.Join(cols, " "))
+
 	for rows.Next() {
 		u := &User{}
-		if err := rows.Scan(&u.UserID, &u.Name); err != nil {
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
 			panic(err)
 		}
 		userList = append(userList, u)
@@ -56,11 +54,9 @@ func (db *userRepo) get(userID int) (*User, error) {
 	sqlStatement := `SELECT * FROM users WHERE userid=$1;`
 	row := db.connector.QueryRow(sqlStatement, userID)
 
-	// IWAACCT
 	u := &User{}
-	if err := row.Scan(&u.UserID, &u.Name); err != nil {
-		panic(err)
-		// return nil, err // Can either return error or just panic here
+	if err := row.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+		return nil, err
 	}
 
 	return u, nil
@@ -68,16 +64,19 @@ func (db *userRepo) get(userID int) (*User, error) {
 
 // Why are we returning the same user we just created?
 func (db *userRepo) create(user *User) (*User, error) {
-	//s.db.get
 
 	// IWAACCT
-	sqlStatement := `INSERT INTO users(username, password, email)
-	VALUES ($1, $2, $3);`
-	_, err := db.connector.Exec(sqlStatement, user.Name)
+	sqlStatement := `INSERT INTO users(username, birthday, location, interest)
+	VALUES ($1, $2, $3, $4) RETURNING userid;`
+
+	lastInsertID := 0
+	err := db.connector.QueryRow(sqlStatement, user.Name, user.Birthday, user.Location, user.Interest).Scan(&lastInsertID)
+
+	// Put ID into the user
+	user.UserID = lastInsertID
 
 	if err != nil {
-		panic(err)
-		// return nil, err // Can either return error or just panic here
+		return nil, err
 	}
 
 	return user, nil
@@ -86,24 +85,47 @@ func (db *userRepo) create(user *User) (*User, error) {
 func (db *userRepo) update(user *User) (*User, error) {
 	// IWAACCT
 
-	oldUser, _ := db.get(user.UserID)
+	oldUser, err := db.get(user.UserID)
+	if err != nil {
+		return nil, err
+	}
 	newUser := &User{}
 
+	// NAME
 	if user.Name == "" {
 		newUser.Name = oldUser.Name
 	} else {
 		newUser.Name = user.Name
 	}
 
+	// BIRTHDAY
+	if user.Birthday == "" {
+		newUser.Birthday = oldUser.Birthday
+	} else {
+		newUser.Birthday = user.Birthday
+	}
+	// LOCATION
+	if user.Location == "" {
+		newUser.Location = oldUser.Location
+	} else {
+		newUser.Location = user.Location
+	}
+	// INTEREST
+	if user.Interest == "" {
+		newUser.Interest = oldUser.Interest
+	} else {
+		newUser.Interest = user.Interest
+	}
+
 	// Insert new user into database
 	sqlStatement := `
 	UPDATE users
-	SET username = $1
-	WHERE id = $4;`
+	SET username = $1, birthday=$2, location=$3, interest=$4
+	WHERE userID = $5;`
 
-	_, err := db.connector.Exec(sqlStatement, newUser.Name, user.UserID)
+	_, err = db.connector.Exec(sqlStatement, newUser.Name, newUser.Birthday, newUser.Location, newUser.Interest, user.UserID)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return user, nil
 }
