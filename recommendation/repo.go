@@ -122,14 +122,28 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 
 	sqlStatement := `
 		SELECT
-			u.userid, u.username, u.birthday, u.location, u.interest
+			u.userid, 
+			u.username, 
+			p.birthdate, 
+			concat(l.city, ' ', l.state, ' ', l.country) as location, 
+			i.interestname
 		FROM
 			interest i
 				INNER JOIN userinterest ui ON i.interestid = ui.interestid
 				INNER JOIN profile p ON p.userid = ui.userid
 				INNER JOIN users u ON u.userid = ui.userid
+				INNER JOIN location l ON p.locationid = l.locationid
 		WHERE
+			ui.interestid IN
+				(
+					SELECT ui.interestid
+					FROM userinterest ui
+					WHERE ui.userid = $1
+				)
+			AND
 			p.availability = true
+			AND
+			ui.userid != $1
 		;
 	`
 	// rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
