@@ -11,6 +11,8 @@ type UserRepo interface {
 	get(int) (*User, error)
 	create(*User) (*User, error)
 	update(*User) (*User, error)
+	getMatches(int) ([]*User, error)
+	deleteMatch(int, int) (bool, error)
 }
 
 type userRepo struct {
@@ -128,4 +130,35 @@ func (db *userRepo) update(user *User) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (db *userRepo) getMatches(userID int) ([]*User, error) {
+	//AMER PLS HELP
+	//s.db.get
+
+	// sqlStatement := `SELECT * FROM users WHERE userid=$1;`
+	// row := db.connector.QueryRow(sqlStatement, userID)
+
+	// u := &User{}
+	// if err := row.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+	// 	return nil, err
+	// }
+
+	// return u, nil
+	return nil, nil
+}
+
+func (db *userRepo) deleteMatch(userID, targetID int) (bool, error) {
+	//AMER PLS HELP
+	//s.db.get
+
+	// sqlStatement := `SELECT * FROM users WHERE userid=$1;`
+	// row := db.connector.QueryRow(sqlStatement, userID)
+
+	// u := &User{}
+	// if err := row.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+	// 	return nil, err
+	// }
+
+	return true, nil
 }

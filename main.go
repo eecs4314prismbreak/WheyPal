@@ -53,6 +53,8 @@ func main() {
 	router.PUT("/login", auth.CheckJWT(), updateLogin)
 	router.POST("/auth", auth.CheckJWT(), validate)
 	router.GET("/recommend", recommend)
+	router.GET("/match", auth.CheckJWT(), getMatches)
+	router.DELETE("/match", auth.CheckJWT(), deleteMatch)
 
 	router.Run(":" + port)
 }

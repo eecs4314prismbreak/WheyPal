@@ -326,3 +326,31 @@ func recommend(c *gin.Context) {
 		}
 	}
 }
+
+func getMatches(c *gin.Context) {
+	idFromToken := c.GetInt("userID")
+
+	resp, err := userSrv.GetMatches(idFromToken)
+	if err != nil {
+		log.Printf("ERROR GETTING MATCHES | %v", err)
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(200, &resp)
+}
+
+func deleteMatch(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	idFromToken := c.GetInt("userID")
+
+	resp, err := userSrv.DeleteMatch(idFromToken, id)
+
+	if err != nil {
+		log.Printf("ERROR GETTING MATCHES | %v", err)
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(200, &resp)
+}

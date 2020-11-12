@@ -63,12 +63,12 @@ func (r *recommendationRepo) HandleRecommendationResponse(msg *RecommendationMes
 		if u.UserB == sourceID {
 			err = r.createMatch(sourceID, targetID)
 			if err != nil {
-				return PositiveResponse, err
+				return NegativeResponse, err
 			}
 		}
 	}
 
-	return NegativeResponse, nil //NegativeResponse might not be correct
+	return PositiveResponse, nil
 }
 
 func (r *recommendationRepo) createMatch(userA int, userB int) error {
@@ -103,7 +103,7 @@ func (r *recommendationRepo) getUserMatchRequestRows(userID int) ([]*MatchReques
 	if err == sql.ErrNoRows {
 		return nil, err
 	} else if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	for rows.Next() {
