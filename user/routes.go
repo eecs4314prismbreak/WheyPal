@@ -1,7 +1,5 @@
 package user
 
-import "math/rand"
-
 type UserService interface {
 	Create(*User) (*User, error)
 	Update(*User) (*User, error)
@@ -11,7 +9,7 @@ type UserService interface {
 
 func (s *userService) Create(user *User) (*User, error) {
 	//user given random id lol
-	user.UserID = rand.Intn(100000) + 1000000
+	// user.UserID = rand.Intn(100000) + 1000000
 
 	resp, err := s.db.create(user)
 	if err != nil {

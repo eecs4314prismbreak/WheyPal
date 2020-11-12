@@ -2,8 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
-	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -36,8 +34,8 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	cols, _ := rows.Columns()
-	fmt.Printf("COLS: %s", strings.Join(cols, " "))
+	// cols, _ := rows.Columns()
+	// fmt.Printf("COLS: %s", strings.Join(cols, " "))
 
 	for rows.Next() {
 		u := &User{}
@@ -68,9 +66,20 @@ func (db *userRepo) get(userID int) (*User, error) {
 func (db *userRepo) create(user *User) (*User, error) {
 
 	// IWAACCT
+<<<<<<< HEAD
 	sqlStatement := `INSERT INTO users(userid, username, birthday, location, interest)
 	VALUES ($1, $2, $3, $4, $5);`
 	_, err := db.connector.Exec(sqlStatement, user.UserID, user.Name, user.Birthday, user.Location, user.Interest)
+=======
+	sqlStatement := `INSERT INTO users(username, birthday, location, interest)
+	VALUES ($1, $2, $3, $4) RETURNING userid;`
+
+	lastInsertID := 0
+	err := db.connector.QueryRow(sqlStatement, user.Name, user.Birthday, user.Location, user.Interest).Scan(&lastInsertID)
+
+	// Put ID into the user
+	user.UserID = lastInsertID
+>>>>>>> 204ba625051e09d0890302013c899acc2b49c558
 
 	if err != nil {
 		return nil, err
@@ -95,7 +104,10 @@ func (db *userRepo) update(user *User) (*User, error) {
 		newUser.Name = user.Name
 	}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 204ba625051e09d0890302013c899acc2b49c558
 	// BIRTHDAY
 	if user.Birthday == "" {
 		newUser.Birthday = oldUser.Birthday
@@ -119,12 +131,11 @@ func (db *userRepo) update(user *User) (*User, error) {
 	sqlStatement := `
 	UPDATE users
 	SET username = $1, birthday=$2, location=$3, interest=$4
-	WHERE id = $5;`
+	WHERE userID = $5;`
 
 	_, err = db.connector.Exec(sqlStatement, newUser.Name, newUser.Birthday, newUser.Location, newUser.Interest, user.UserID)
-
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return user, nil
 }

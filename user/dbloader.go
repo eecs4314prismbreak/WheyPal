@@ -46,7 +46,7 @@ func LoadPGDB() *sql.DB {
 	if err != nil {
 		panic(err)
 	} else {
-		log.Printf("Database Connection Successful\n")
+		log.Printf("User Database Connection Successful\n")
 	}
 	return db
 }
