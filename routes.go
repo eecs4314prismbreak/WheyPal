@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	auth "github.com/eecs4314prismbreak/WheyPal/auth"
@@ -14,7 +15,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	//fix for specific origin later
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
 
 // the '/' endpoint
 func homeHandler(c *gin.Context) {
@@ -214,14 +218,58 @@ func validate(c *gin.Context) {
 }
 
 func recommend(c *gin.Context) {
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
 	defer conn.Close()
+
+	// var jwt string
+
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Println("read token:", err)
+		return
+	}
+
+	// err = json.Unmarshal(message, jwt)
+	// if err != nil {
+	// 	log.Println("unmarshall jwToken:", err)
+	// 	return
+	// }
+
+	claims, _ := auth.ClaimsFromToken(string(message))
+	userID := claims.UserID
+
 	var recommenaditonMessage *rec.RecommendationMessage
-	var recommenaditonResponse rec.RecommendationResponse
+	var recommenaditonResponse bool
+	var recs []*user.User
+	count := 0
+
+	recs, err = recSrv.GetRecommendations(userID)
+	if err != nil {
+		log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
+		return
+	}
+
+	// testUser := &user.User{
+	// 	UserID: 1,
+	// 	Name:   "Allen",
+	// }
+
+	// recs = []*user.User{testUser}
+
+	recMsg, _ := json.Marshal(recs)
+	log.Printf("SENDING RECS TO USER | %v", string(recMsg))
+
+	err = conn.WriteMessage(1, recMsg)
+	if err != nil {
+		log.Println("write:", err)
+		return
+	}
+
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
@@ -232,19 +280,36 @@ func recommend(c *gin.Context) {
 
 		err = json.Unmarshal(message, recommenaditonMessage)
 		if err != nil {
-			log.Println("Could not unmashall recommendation:", err)
+			log.Printf("Could not unmashall recommendation: %v", err)
 			break
 		}
 		// log.Printf("recv: %s", message)
 
 		recommenaditonResponse, err = recSrv.HandleRecommendationResponse(recommenaditonMessage)
 
-		response, err := json.Marshal(recommenaditonResponse)
+		response, _ := json.Marshal(recommenaditonResponse)
 
 		err = conn.WriteMessage(mt, response)
 		if err != nil {
 			log.Println("write:", err)
 			break
+		}
+		count++
+
+		if count == len(recs) {
+			count = 0
+			recs, err = recSrv.GetRecommendations(userID)
+			if err != nil {
+				log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
+				return
+			}
+			recMsg, _ := json.Marshal(recs)
+
+			err = conn.WriteMessage(mt, recMsg)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
 		}
 	}
 }

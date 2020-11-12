@@ -50,7 +50,7 @@ func createJWT(userID int) (*StoredToken, error) {
 
 // VerifyToken func will used to Verify the JWT Token while using APIS
 // func verifyToken(tokenString string) (*Claims, error) {
-func claimsFromToken(tokenString string) (*Claims, error) {
+func ClaimsFromToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -83,7 +83,7 @@ func CheckJWT() gin.HandlerFunc {
 			return
 		}
 		token, _ := jwtMiddleware.FromAuthHeader(c.Request)
-		claims, _ := claimsFromToken(token)
+		claims, _ := ClaimsFromToken(token)
 		c.Set("userID", claims.UserID)
 	}
 }

@@ -3,13 +3,14 @@ package recommendation
 import (
 	"database/sql"
 	"fmt"
+	"log"
+
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
-	"log"
 )
 
 const (
-	dbCredFile = "recommendation/db_credentials"
+	dbCredFile = "db_credentials"
 )
 
 func initConfig() {

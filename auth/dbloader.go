@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	dbCredFile = "auth/db_credentials"
+	dbCredFile = "db_credentials"
 )
 
 func initConfig() {

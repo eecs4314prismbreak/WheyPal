@@ -132,7 +132,8 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 			p.availability = true
 		;
 	`
-	rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
+	// rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
+	rows, err := r.connector.Query(sqlStatement)
 	if err != nil {
 		return nil, err
 	}
