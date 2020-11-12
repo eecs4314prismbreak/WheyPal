@@ -46,12 +46,12 @@ const (
 	NegativeResponse
 )
 
-type MatchStatus int
+type MatchStatus string
 
 const (
-	StatusAccept   MatchStatus = iota //0
-	StatusDecline                     //1
-	StatusPendingA                    //2
-	StatusPendingB
-	StatusNotFound
+	StatusAccept   MatchStatus = "accepted"
+	StatusDecline  MatchStatus = "declined"
+	StatusPendingA MatchStatus = "pendingUserA"
+	StatusPendingB MatchStatus = "pendingUserB"
+	StatusNotFound MatchStatus = "notFound"
 )
