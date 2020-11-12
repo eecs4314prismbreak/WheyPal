@@ -2,6 +2,7 @@ package recommendation
 
 import (
 	"database/sql"
+
 	"github.com/eecs4314prismbreak/WheyPal/user"
 	_ "github.com/lib/pq"
 )
@@ -137,7 +138,7 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 		;
 	`
 	// rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
-	rows, err := r.connector.Query(sqlStatement)
+	rows, err := r.connector.Query(sqlStatement, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,7 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 		u := &user.User{}
 		//11NOV @AMER make sure this here is correct
 		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
-			panic(err)
+			return nil, err
 		}
 		userList = append(userList, u)
 	}

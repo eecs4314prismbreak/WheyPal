@@ -52,6 +52,7 @@ func main() {
 	router.POST("/login", login)
 	router.PUT("/login", auth.CheckJWT(), updateLogin)
 	router.POST("/auth", auth.CheckJWT(), validate)
+	router.GET("/recommend", recommend)
 
 	router.Run(":" + port)
 }

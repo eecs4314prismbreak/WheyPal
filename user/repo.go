@@ -66,11 +66,6 @@ func (db *userRepo) get(userID int) (*User, error) {
 func (db *userRepo) create(user *User) (*User, error) {
 
 	// IWAACCT
-<<<<<<< HEAD
-	sqlStatement := `INSERT INTO users(userid, username, birthday, location, interest)
-	VALUES ($1, $2, $3, $4, $5);`
-	_, err := db.connector.Exec(sqlStatement, user.UserID, user.Name, user.Birthday, user.Location, user.Interest)
-=======
 	sqlStatement := `INSERT INTO users(username, birthday, location, interest)
 	VALUES ($1, $2, $3, $4) RETURNING userid;`
 
@@ -79,7 +74,6 @@ func (db *userRepo) create(user *User) (*User, error) {
 
 	// Put ID into the user
 	user.UserID = lastInsertID
->>>>>>> 204ba625051e09d0890302013c899acc2b49c558
 
 	if err != nil {
 		return nil, err
@@ -104,10 +98,6 @@ func (db *userRepo) update(user *User) (*User, error) {
 		newUser.Name = user.Name
 	}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 204ba625051e09d0890302013c899acc2b49c558
 	// BIRTHDAY
 	if user.Birthday == "" {
 		newUser.Birthday = oldUser.Birthday
