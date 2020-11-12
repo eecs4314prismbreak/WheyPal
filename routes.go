@@ -221,7 +221,7 @@ func recommend(c *gin.Context) {
 	}
 	defer conn.Close()
 	var recommenaditonMessage *rec.RecommendationMessage
-	var recommenaditonResponse rec.RecomendationResponse
+	var recommenaditonResponse rec.RecommendationResponse
 	for {
 		mt, message, err := conn.ReadMessage()
 		if err != nil {
@@ -237,7 +237,7 @@ func recommend(c *gin.Context) {
 		}
 		// log.Printf("recv: %s", message)
 
-		recommenaditonResponse, err = recSrv.HandleRecommenatdonResponse(recommenaditonMessage)
+		recommenaditonResponse, err = recSrv.HandleRecommendationResponse(recommenaditonMessage)
 
 		response, err := json.Marshal(recommenaditonResponse)
 

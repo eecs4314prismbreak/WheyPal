@@ -7,7 +7,7 @@ import (
 )
 
 type RecommendationService interface {
-	HandleRecommenatdonResponse(*RecommendationMessage) (RecomendationResponse, error)
+	HandleRecommendationResponse(msg *RecommendationMessage) (bool, error)
 	GetRecommendations(userID int) ([]*user.User, error)
 }
 
@@ -21,7 +21,7 @@ func (s *recommendationService) GetRecommendations(userID int) ([]*user.User, er
 	return userList, nil
 }
 
-func (s *recommendationService) HandleRecommenatdonResponse(msg *RecommendationMessage) (RecomendationResponse, error) {
+func (s *recommendationService) HandleRecommendationResponse(msg *RecommendationMessage) (bool, error) {
 	// TODO: Implement the following:
 	// user will see targetuser and will do positive or negative response
 	// Do either:
@@ -36,16 +36,8 @@ func (s *recommendationService) HandleRecommenatdonResponse(msg *RecommendationM
 
 	// userid := msg.UserID1
 	// targetid := msg.UserID2
-	response := msg.RecomendationResponse
 
-	if response == PositiveResponse {
-		// TODO: Deal with positive response
-	} else {
-		// TODO: Deal with negative response
-	}
-
-	//recommendationresponse is int = 1 or int = 2
-	//1 means positive response (right swipe)
-	//2 means negathive response (left swipe)
-	return msg.RecomendationResponse, nil
+	// status = 'accepted' OR status = 'declined' OR status = 'pendingUserA' OR status = 'pendingUserB'
+	resp, err := s.db.HandleRecommendationResponse(msg)
+	return resp, err
 }
