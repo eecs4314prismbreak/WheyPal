@@ -15,7 +15,7 @@ func NewService() RecommendationService {
 type Match struct {
 	UserID1                int `json:"userID1"`
 	UserID2                int `json:"userID2"`
-	RecommendationResponse int `json:"matchResponse"`
+	RecommendationResponse int `json:"recommendationResponse"`
 }
 
 type Recommendations struct {
@@ -37,14 +37,21 @@ type RecommendationMessage struct {
 
 type RecommendationResponse int
 
-const PositiveResponse RecommendationResponse = 1
-const NegativeResponse RecommendationResponse = 2
+// const PositiveResponse RecommendationResponse = 1
+// const NegativeResponse RecommendationResponse = 2
 
-const PosResp = 1
-const NegResp = 2
+const (
+	NilResponse RecommendationResponse = iota
+	PositiveResponse
+	NegativeResponse
+)
 
-const STATUS_ACCEPT = "accepted"
-const STATUS_DECLINED = "declined"
-const STATUS_PENDING_A = "pendingUserA"
-const STATUS_PENDING_B = "pendingUserB"
-const STATUS_NOT_FOUND = "notFound"
+type MatchStatus int
+
+const (
+	StatusAccept   MatchStatus = iota //0
+	StatusDecline                     //1
+	StatusPendingA                    //2
+	StatusPendingB
+	StatusNotFound
+)

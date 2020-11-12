@@ -244,13 +244,14 @@ func recommend(c *gin.Context) {
 	userID := claims.UserID
 
 	var recommenaditonMessage *rec.RecommendationMessage
-	var recommenaditonResponse bool
+	var recommenaditonResponse rec.RecommendationResponse
 	var recs []*user.User
 	count := 0
 
-	recs, err = recSrv.GetRecommendations(userID)
+	// recs, err = recSrv.GetRecommendations(userID)
+	recs, err = recSrv.GetRecommendations(5)
 	if err != nil {
-		log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
+		log.Printf("ERROR SENDING REC ON WEBSOCKET | UID %v | RECS %v", userID, err)
 		return
 	}
 
@@ -262,7 +263,8 @@ func recommend(c *gin.Context) {
 	// recs = []*user.User{testUser}
 
 	recMsg, _ := json.Marshal(recs)
-	log.Printf("SENDING RECS TO USER | %v", string(recMsg))
+	// log.Printf("SENDING RECS TO USER | UID %v | RECS %s", userID, recMsg)
+	log.Printf("SENDING RECS TO USER | UID %v", userID)
 
 	err = conn.WriteMessage(1, recMsg)
 	if err != nil {
@@ -276,19 +278,30 @@ func recommend(c *gin.Context) {
 			log.Println("read:", err)
 			break
 		}
+
 		// log.Printf("recv: %s", message)
 
-		err = json.Unmarshal(message, recommenaditonMessage)
+		err = json.Unmarshal(message, &recommenaditonMessage)
 		if err != nil {
-			log.Printf("Could not unmashall recommendation: %v", err)
+			log.Printf("Could not unmashall recommendation response | MT %v | RESP: %s\nERR: %v", mt, message, err)
 			break
 		}
 		// log.Printf("recv: %s", message)
+		log.Printf("REVECIED REC RESPONSE | RAW %s | MASHALLED RESP %v", message, recommenaditonMessage)
 
 		recommenaditonResponse, err = recSrv.HandleRecommendationResponse(recommenaditonMessage)
+		if err != nil {
+			log.Printf("Could not handle rec response | RESP: %v\nERR: %v", recommenaditonResponse, err)
+			break
+		}
 
-		response, _ := json.Marshal(recommenaditonResponse)
+		response, err := json.Marshal(recommenaditonResponse)
+		if err != nil {
+			log.Printf("Could not mashall outgoing rec response |RESP: %s\nERR: %v", response, err)
+			break
+		}
 
+		log.Printf("SENDING REC RESPONSE | MASHALLED RESP %s", response)
 		err = conn.WriteMessage(mt, response)
 		if err != nil {
 			log.Println("write:", err)

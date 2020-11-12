@@ -7,7 +7,7 @@ import (
 )
 
 type RecommendationService interface {
-	HandleRecommendationResponse(msg *RecommendationMessage) (bool, error)
+	HandleRecommendationResponse(msg *RecommendationMessage) (RecommendationResponse, error)
 	GetRecommendations(userID int) ([]*user.User, error)
 }
 
@@ -21,7 +21,7 @@ func (s *recommendationService) GetRecommendations(userID int) ([]*user.User, er
 	return userList, nil
 }
 
-func (s *recommendationService) HandleRecommendationResponse(msg *RecommendationMessage) (bool, error) {
+func (s *recommendationService) HandleRecommendationResponse(msg *RecommendationMessage) (RecommendationResponse, error) {
 	// TODO: Implement the following:
 	// user will see targetuser and will do positive or negative response
 	// Do either:

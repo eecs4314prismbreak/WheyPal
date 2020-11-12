@@ -9,10 +9,10 @@ import (
 
 type RecommendationRepo interface {
 	getRecommendations(userID int) ([]*user.User, error)
-	monoMatchHandle(userID, targetUserID int, resp int) error
-	saveMatch(userID, targetUserID int) (*RecommendationResponse, error)
+	monoMatchHandle(userID, targetUserID int, resp RecommendationResponse) error
+	saveMatch(userID, targetUserID int) (RecommendationResponse, error)
 	deleteMonoMatch(userID, targetUserID int) error
-	HandleRecommendationResponse(msg *RecommendationMessage) (bool, error)
+	HandleRecommendationResponse(msg *RecommendationMessage) (RecommendationResponse, error)
 }
 
 type recommendationRepo struct {
@@ -26,31 +26,31 @@ func NewDatabase() RecommendationRepo {
 }
 
 // Will return true if generating a match, false otherwise
-func (r *recommendationRepo) HandleRecommendationResponse(msg *RecommendationMessage) (bool, error) {
+func (r *recommendationRepo) HandleRecommendationResponse(msg *RecommendationMessage) (RecommendationResponse, error) {
 	response := msg.RecommendationResponse
 	sourceID := msg.UserID1
 	targetID := msg.UserID2
 
 	var err error = nil
 	if response == PositiveResponse {
-		err = r.monoMatchHandle(sourceID, targetID, PosResp)
+		err = r.monoMatchHandle(sourceID, targetID, PositiveResponse)
 	} else {
-		err = r.monoMatchHandle(sourceID, targetID, NegResp)
+		err = r.monoMatchHandle(sourceID, targetID, NegativeResponse)
 	}
 
 	if err != nil {
-		return false, err
+		return NegativeResponse, err
 	}
 
 	// Do a check here for potential matches
 	mrListB, err := r.getUserMatchRequestRows(targetID)
 	if err != nil {
-		return false, err
+		return NegativeResponse, err
 	}
 
 	// List empty => target user has not swiped on userA yet => do nothing
 	if mrListB == nil {
-		return false, nil
+		return NegativeResponse, nil
 	}
 
 	// Iterate through Match Request List
@@ -63,11 +63,12 @@ func (r *recommendationRepo) HandleRecommendationResponse(msg *RecommendationMes
 		if u.UserB == sourceID {
 			err = r.createMatch(sourceID, targetID)
 			if err != nil {
-				return false, err
+				return PositiveResponse, err
 			}
 		}
 	}
-	return true, nil
+
+	return NegativeResponse, nil //NegativeResponse might not be correct
 }
 
 func (r *recommendationRepo) createMatch(userA int, userB int) error {
@@ -75,7 +76,7 @@ func (r *recommendationRepo) createMatch(userA int, userB int) error {
 	sqlStatement := ` UPDATE matchrequest
 	SET status = $1 
 	WHERE usera = $2 AND userb = $3;`
-	_, err := r.connector.Exec(sqlStatement, STATUS_ACCEPT, userA, userB)
+	_, err := r.connector.Exec(sqlStatement, StatusAccept, userA, userB)
 	if err != nil {
 		return err
 	}
@@ -84,7 +85,7 @@ func (r *recommendationRepo) createMatch(userA int, userB int) error {
 	sqlStatement = ` UPDATE matchrequest
 	SET status = $1 
 	WHERE usera = $2 AND userb = $3;`
-	_, err = r.connector.Exec(sqlStatement, STATUS_ACCEPT, userB, userA)
+	_, err = r.connector.Exec(sqlStatement, StatusAccept, userB, userA)
 	if err != nil {
 		return err
 	}
@@ -155,15 +156,15 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 	return userList, nil
 }
 
-func (r *recommendationRepo) monoMatchHandle(userID, targetUserID int, resp int) error {
+func (r *recommendationRepo) monoMatchHandle(userID, targetUserID int, resp RecommendationResponse) error {
 	sqlStatement := `INSERT INTO matchrequest( status, usera, userb ) VALUES ( $1, $2, $3 );`
 
-	respString := ""
+	var respString MatchStatus
 
-	if resp == PosResp {
-		respString = STATUS_PENDING_B
+	if resp == PositiveResponse {
+		respString = StatusPendingA
 	} else {
-		respString = STATUS_DECLINED
+		respString = StatusDecline
 	}
 	_, err := r.connector.Exec(sqlStatement, respString, userID, targetUserID)
 
@@ -194,8 +195,8 @@ func (r *recommendationRepo) deleteMonoMatch(userID, targetUserID int) error {
 	return nil
 }
 
-func (r *recommendationRepo) saveMatch(userID, targetUserID int) (*RecommendationResponse, error) {
+func (r *recommendationRepo) saveMatch(userID, targetUserID int) (RecommendationResponse, error) {
 	// TODO, may not even need it
 
-	return nil, nil
+	return 0, nil
 }
