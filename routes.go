@@ -248,8 +248,8 @@ func recommend(c *gin.Context) {
 	var recs []*user.User
 	count := 0
 
-	// recs, err = recSrv.GetRecommendations(userID)
-	recs, err = recSrv.GetRecommendations(5)
+	recs, err = recSrv.GetRecommendations(userID)
+	// recs, err = recSrv.GetRecommendations(5)
 	if err != nil {
 		log.Printf("ERROR SENDING REC ON WEBSOCKET | UID %v | RECS %v", userID, err)
 		return
