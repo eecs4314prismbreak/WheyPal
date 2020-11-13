@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	dbCredFile = "db_credentials"
+	dbCredFile = "config/db_credentials"
 )
 
 func initConfig() {
 	viper.SetConfigName(dbCredFile)
 	viper.SetConfigType("ini")
 
-	viper.AddConfigPath("./config")
+	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
