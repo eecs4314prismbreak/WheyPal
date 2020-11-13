@@ -10,9 +10,9 @@ type authService struct {
 	Repo AuthRepo
 }
 
-func NewService(redisAddr string) AuthService {
+func NewService() AuthService {
 	return &authService{
-		Repo: NewAuthRepo(redisAddr),
+		Repo: NewAuthRepo(),
 	}
 }
 

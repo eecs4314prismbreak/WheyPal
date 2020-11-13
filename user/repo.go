@@ -42,7 +42,7 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	for rows.Next() {
 		u := &User{}
 		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
-			panic(err)
+			return nil, err
 		}
 		userList = append(userList, u)
 	}
@@ -133,32 +133,45 @@ func (db *userRepo) update(user *User) (*User, error) {
 }
 
 func (db *userRepo) getMatches(userID int) ([]*User, error) {
-	//AMER PLS HELP
-	//s.db.get
+	var userList []*User
 
-	// sqlStatement := `SELECT * FROM users WHERE userid=$1;`
-	// row := db.connector.QueryRow(sqlStatement, userID)
+	sqlStatement := `SELECT
+						userid, username, birthday, location, interest 
+					FROM
+						matchrequest m 
+						RIGHT JOIN
+						users u 
+						ON m.userb = u.userid 
+					WHERE
+						m.usera = $1 
+						and status = $2;`
+	rows, err := db.connector.Query(sqlStatement, userID, StatusAccept)
 
-	// u := &User{}
-	// if err := row.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
-	// 	return nil, err
-	// }
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-	// return u, nil
-	return nil, nil
+	// cols, _ := rows.Columns()
+	// fmt.Printf("COLS: %s\n", strings.Join(cols, " "))
+
+	for rows.Next() {
+		u := &User{}
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+			return nil, err
+		}
+		userList = append(userList, u)
+	}
+
+	return userList, nil
 }
 
 func (db *userRepo) deleteMatch(userID, targetID int) (bool, error) {
-	//AMER PLS HELP
-	//s.db.get
-
-	// sqlStatement := `SELECT * FROM users WHERE userid=$1;`
-	// row := db.connector.QueryRow(sqlStatement, userID)
-
-	// u := &User{}
-	// if err := row.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
-	// 	return nil, err
-	// }
+	sqlStatement := `DELETE FROM matchrequest WHERE usera=$1 AND userb=$2;`
+	_, err := db.connector.Exec(sqlStatement, userID, targetID)
+	if err != nil {
+		return false, err
+	}
 
 	return true, nil
 }

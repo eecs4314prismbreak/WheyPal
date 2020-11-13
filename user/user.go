@@ -21,3 +21,13 @@ type User struct {
 type UsersResponse struct {
 	Users []*User `json:"users"`
 }
+
+type MatchStatus string
+
+const (
+	StatusAccept   MatchStatus = "accepted"
+	StatusDecline  MatchStatus = "declined"
+	StatusPendingA MatchStatus = "pendingUserA"
+	StatusPendingB MatchStatus = "pendingUserB"
+	StatusNotFound MatchStatus = "notFound"
+)

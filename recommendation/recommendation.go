@@ -1,6 +1,6 @@
 package recommendation
 
-import "os/user"
+import "github.com/eecs4314prismbreak/WheyPal/user"
 
 type recommendationService struct {
 	db RecommendationRepo
@@ -37,21 +37,8 @@ type RecommendationMessage struct {
 
 type RecommendationResponse int
 
-// const PositiveResponse RecommendationResponse = 1
-// const NegativeResponse RecommendationResponse = 2
-
 const (
 	NilResponse RecommendationResponse = iota
 	PositiveResponse
 	NegativeResponse
-)
-
-type MatchStatus string
-
-const (
-	StatusAccept   MatchStatus = "accepted"
-	StatusDecline  MatchStatus = "declined"
-	StatusPendingA MatchStatus = "pendingUserA"
-	StatusPendingB MatchStatus = "pendingUserB"
-	StatusNotFound MatchStatus = "notFound"
 )

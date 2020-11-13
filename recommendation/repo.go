@@ -76,7 +76,7 @@ func (r *recommendationRepo) createMatch(userA int, userB int) error {
 	sqlStatement := ` UPDATE matchrequest
 	SET status = $1 
 	WHERE usera = $2 AND userb = $3;`
-	_, err := r.connector.Exec(sqlStatement, StatusAccept, userA, userB)
+	_, err := r.connector.Exec(sqlStatement, user.StatusAccept, userA, userB)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (r *recommendationRepo) createMatch(userA int, userB int) error {
 	sqlStatement = ` UPDATE matchrequest
 	SET status = $1 
 	WHERE usera = $2 AND userb = $3;`
-	_, err = r.connector.Exec(sqlStatement, StatusAccept, userB, userA)
+	_, err = r.connector.Exec(sqlStatement, user.StatusAccept, userB, userA)
 	if err != nil {
 		return err
 	}
@@ -159,12 +159,12 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 func (r *recommendationRepo) monoMatchHandle(userID, targetUserID int, resp RecommendationResponse) error {
 	sqlStatement := `INSERT INTO matchrequest( status, usera, userb ) VALUES ( $1, $2, $3 );`
 
-	var respString MatchStatus
+	var respString user.MatchStatus
 
 	if resp == PositiveResponse {
-		respString = StatusPendingA
+		respString = user.StatusPendingA
 	} else {
-		respString = StatusDecline
+		respString = user.StatusDecline
 	}
 	_, err := r.connector.Exec(sqlStatement, respString, userID, targetUserID)
 
