@@ -1,2 +1,2 @@
 frontend
-db_credentials.ini
+config/db_credentials.ini

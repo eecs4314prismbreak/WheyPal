@@ -17,7 +17,7 @@ func initConfig() {
 	viper.SetConfigName(dbCredFile)
 	viper.SetConfigType("ini")
 
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("./config")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
