@@ -23,12 +23,10 @@ type authRepo struct {
 	TokenRepo *redis.Client
 }
 
-func NewAuthRepo(redisAddr string) AuthRepo {
+func NewAuthRepo() AuthRepo {
 	return &authRepo{
 		LoginRepo: LoadPGDB(),
-		TokenRepo: redis.NewClient(&redis.Options{
-			Addr: redisAddr,
-		}),
+		TokenRepo: LoadRedis(),
 	}
 }
 

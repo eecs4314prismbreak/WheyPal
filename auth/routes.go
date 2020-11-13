@@ -76,7 +76,7 @@ func (s *authService) ValidateToken(userID int, token string) (*Claims, error) {
 	}
 
 	//get claims
-	claims, err := claimsFromToken(token)
+	claims, err := ClaimsFromToken(token)
 	if err != nil {
 		log.Printf("RETRIEVE CLAIM ERROR | %v", err)
 		return nil, err

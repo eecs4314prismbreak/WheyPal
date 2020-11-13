@@ -1,3 +1,2 @@
 frontend
-user/db_credentials
-auth/db_credentials
+db_credentials.ini

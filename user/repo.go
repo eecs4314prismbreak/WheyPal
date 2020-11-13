@@ -11,6 +11,8 @@ type UserRepo interface {
 	get(int) (*User, error)
 	create(*User) (*User, error)
 	update(*User) (*User, error)
+	getMatches(int) ([]*User, error)
+	deleteMatch(int, int) (bool, error)
 }
 
 type userRepo struct {
@@ -40,7 +42,7 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 	for rows.Next() {
 		u := &User{}
 		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
-			panic(err)
+			return nil, err
 		}
 		userList = append(userList, u)
 	}
@@ -128,4 +130,48 @@ func (db *userRepo) update(user *User) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (db *userRepo) getMatches(userID int) ([]*User, error) {
+	var userList []*User
+
+	sqlStatement := `SELECT
+						userid, username, birthday, location, interest 
+					FROM
+						matchrequest m 
+						RIGHT JOIN
+						users u 
+						ON m.userb = u.userid 
+					WHERE
+						m.usera = $1 
+						and status = $2;`
+	rows, err := db.connector.Query(sqlStatement, userID, StatusAccept)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// cols, _ := rows.Columns()
+	// fmt.Printf("COLS: %s\n", strings.Join(cols, " "))
+
+	for rows.Next() {
+		u := &User{}
+		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+			return nil, err
+		}
+		userList = append(userList, u)
+	}
+
+	return userList, nil
+}
+
+func (db *userRepo) deleteMatch(userID, targetID int) (bool, error) {
+	sqlStatement := `DELETE FROM matchrequest WHERE usera=$1 AND userb=$2;`
+	_, err := db.connector.Exec(sqlStatement, userID, targetID)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

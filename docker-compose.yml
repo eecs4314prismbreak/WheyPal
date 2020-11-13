@@ -16,10 +16,10 @@ services:
     command: redis-server
     ports:
       - 6379:6379
-  frontend:
-      image: eecs4314prismbreak/wheypal-frontend:latest
-      ports:
-        - "80:80"
+  # frontend:
+  #     image: eecs4314prismbreak/wheypal-frontend:latest
+  #     ports:
+  #       - "80:80"
   # db:
   #   image: postgres
   #   environment:

@@ -1,14 +1,24 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
 	"strconv"
 
 	auth "github.com/eecs4314prismbreak/WheyPal/auth"
+	rec "github.com/eecs4314prismbreak/WheyPal/recommendation"
 	user "github.com/eecs4314prismbreak/WheyPal/user"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	//fix for specific origin later
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
 
 // the '/' endpoint
 func homeHandler(c *gin.Context) {
@@ -200,6 +210,144 @@ func validate(c *gin.Context) {
 
 	resp, err := authSrv.ValidateToken(idFromToken, request.Token)
 	if err != nil {
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(200, &resp)
+}
+
+func recommend(c *gin.Context) {
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	defer conn.Close()
+
+	// var jwt string
+
+	_, message, err := conn.ReadMessage()
+	if err != nil {
+		log.Println("read token:", err)
+		return
+	}
+
+	// err = json.Unmarshal(message, jwt)
+	// if err != nil {
+	// 	log.Println("unmarshall jwToken:", err)
+	// 	return
+	// }
+
+	claims, _ := auth.ClaimsFromToken(string(message))
+	userID := claims.UserID
+
+	var recommenaditonMessage *rec.RecommendationMessage
+	var recommenaditonResponse rec.RecommendationResponse
+	var recs []*user.User
+	count := 0
+
+	recs, err = recSrv.GetRecommendations(userID)
+	// recs, err = recSrv.GetRecommendations(5)
+	if err != nil {
+		log.Printf("ERROR SENDING REC ON WEBSOCKET | UID %v | RECS %v", userID, err)
+		return
+	}
+
+	// testUser := &user.User{
+	// 	UserID: 1,
+	// 	Name:   "Allen",
+	// }
+
+	// recs = []*user.User{testUser}
+
+	recMsg, _ := json.Marshal(recs)
+	// log.Printf("SENDING RECS TO USER | UID %v | RECS %s", userID, recMsg)
+	log.Printf("SENDING RECS TO USER | UID %v", userID)
+
+	err = conn.WriteMessage(1, recMsg)
+	if err != nil {
+		log.Println("write:", err)
+		return
+	}
+
+	for {
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+
+		// log.Printf("recv: %s", message)
+
+		err = json.Unmarshal(message, &recommenaditonMessage)
+		if err != nil {
+			log.Printf("Could not unmashall recommendation response | MT %v | RESP: %s\nERR: %v", mt, message, err)
+			break
+		}
+		// log.Printf("recv: %s", message)
+		log.Printf("REVECIED REC RESPONSE | RAW %s | MASHALLED RESP %v", message, recommenaditonMessage)
+
+		recommenaditonResponse, err = recSrv.HandleRecommendationResponse(recommenaditonMessage)
+		if err != nil {
+			log.Printf("Could not handle rec response | RESP: %v\nERR: %v", recommenaditonResponse, err)
+			break
+		}
+
+		response, err := json.Marshal(recommenaditonResponse)
+		if err != nil {
+			log.Printf("Could not mashall outgoing rec response |RESP: %s\nERR: %v", response, err)
+			break
+		}
+
+		log.Printf("SENDING REC RESPONSE | MASHALLED RESP %s", response)
+		err = conn.WriteMessage(mt, response)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+		count++
+
+		if count == len(recs) {
+			count = 0
+			recs, err = recSrv.GetRecommendations(userID)
+			if err != nil {
+				log.Printf("ERROR SENDING REC ON WEBSOCKET | %v", err)
+				return
+			}
+			recMsg, _ := json.Marshal(recs)
+
+			err = conn.WriteMessage(mt, recMsg)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+	}
+}
+
+func getMatches(c *gin.Context) {
+	idFromToken := c.GetInt("userID")
+
+	resp, err := userSrv.GetMatches(idFromToken)
+	if err != nil {
+		log.Printf("ERROR GETTING MATCHES | %v", err)
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(200, &resp)
+}
+
+func deleteMatch(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	idFromToken := c.GetInt("userID")
+
+	resp, err := userSrv.DeleteMatch(idFromToken, id)
+
+	if err != nil {
+		log.Printf("ERROR GETTING MATCHES | %v", err)
 		c.JSON(500, fmt.Sprintf("%v", err))
 		return
 	}

@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/go-redis/redis"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 )
 
 const (
-	dbCredFile = "auth/db_credentials"
+	dbCredFile = "db_credentials"
 )
 
 func initConfig() {
@@ -49,4 +50,10 @@ func LoadPGDB() *sql.DB {
 		log.Printf("Auth Database Connection Successful\n")
 	}
 	return db
+}
+
+func LoadRedis() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr: viper.GetString("Redis.address"),
+	})
 }
