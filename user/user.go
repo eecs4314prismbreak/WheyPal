@@ -28,6 +28,6 @@ type MatchStatus string
 const (
 	StatusAccept   MatchStatus = "accepted"
 	StatusDecline  MatchStatus = "declined"
-	StatusPendingA MatchStatus = "pendingUser"
+	StatusPendingA MatchStatus = "pendingUserA"
 	StatusNotFound MatchStatus = "notFound"
 )
