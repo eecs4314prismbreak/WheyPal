@@ -123,26 +123,26 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 	var userList []*user.User
 
 	sqlStatement := `
-	SELECT 	u.userid, u.username, u.birthday, u.location, u.interest
+	SELECT 	u.userid, u.firstname, u.lastname, u.birthdate, u.location, u.interest
 	FROM users u
 	WHERE  
 		u.interest IN
 		(
 			SELECT u.interest
 			FROM users u
-			WHERE u.userid = 18
+			WHERE u.userid = $1
 		)
-		AND u.userid NOT EXESTS
+		AND u.userid NOT IN
 		(
 			SELECT mr.usera
 			FROM matchrequest mr
-			WHERE mr.userb = 18
+			WHERE mr.userb = $1
 		)
-		AND u.userid NOT EXISTS
+		AND u.userid NOT IN
 			(
 				SELECT mr.userb
 				FROM matchrequest mr
-				WHERE mr.usera = 18
+				WHERE mr.usera = $1
 			)
 		AND u.userid != $1
 	;	
