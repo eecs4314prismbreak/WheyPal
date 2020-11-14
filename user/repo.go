@@ -170,7 +170,7 @@ func (db *userRepo) getMatches(userID int) ([]*User, error) {
 }
 
 func (db *userRepo) deleteMatch(userID, targetID int) (bool, error) {
-	sqlStatement := `DELETE FROM matchrequest WHERE usera=$1 AND userb=$2;`
+	sqlStatement := `DELETE FROM matchrequest WHERE (usera=$1 AND userb=$2) OR (usera=$2 and userb=$1);`
 	_, err := db.connector.Exec(sqlStatement, userID, targetID)
 	if err != nil {
 		return false, err

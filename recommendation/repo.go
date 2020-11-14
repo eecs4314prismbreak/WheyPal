@@ -65,10 +65,11 @@ func (r *recommendationRepo) HandleRecommendationResponse(msg *RecommendationMes
 			if err != nil {
 				return NegativeResponse, err
 			}
+			return PositiveResponse, nil
 		}
 	}
 
-	return PositiveResponse, nil
+	return NegativeResponse, nil
 }
 
 func (r *recommendationRepo) createMatch(userA int, userB int) error {
@@ -133,12 +134,6 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 			WHERE u.userid = $1
 		)
 		AND u.userid NOT IN
-		(
-			SELECT mr.usera
-			FROM matchrequest mr
-			WHERE mr.userb = $1
-		)
-		AND u.userid NOT IN
 			(
 				SELECT mr.userb
 				FROM matchrequest mr
@@ -147,6 +142,13 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 		AND u.userid != $1
 	;	
 	`
+
+	// AND u.userid NOT IN
+	// (
+	// 	SELECT mr.usera
+	// 	FROM matchrequest mr
+	// 	WHERE mr.userb = $1
+	// )
 
 	// rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
 	rows, err := r.connector.Query(sqlStatement, userID)
@@ -167,14 +169,20 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 }
 
 func (r *recommendationRepo) monoMatchHandle(userID, targetUserID int, resp RecommendationResponse) error {
-	sqlStatement := `INSERT INTO matchrequest( status, usera, userb ) VALUES ( $1, $2, $3 ) 
-						WHERE NOT EXISTS (
-									SELECT usera, userb 
-									FROM matchrequest 
-									WHERE usera = $1 and usberb = $2
-						)
-					;
-	`
+	sqlStatement := `INSERT INTO matchrequest( status, usera, userb ) VALUES ( $1, $2, $3 ) ;`
+	// WHERE
+	// AND usera NOT IN
+	// 	(
+	// 		SELECT mr.usera
+	// 		FROM matchrequest mr
+	// 		WHERE mr.userb = $2
+	// 	)
+	// AND userb NOT IN
+	// 	(
+	// 		SELECT mr.userb
+	// 		FROM matchrequest mr
+	// 		WHERE mr.usera = $3
+	// 	)
 
 	var respString user.MatchStatus
 

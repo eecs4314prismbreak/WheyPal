@@ -283,6 +283,7 @@ func recommend(c *gin.Context) {
 		}
 		// log.Printf("recv: %s", message)
 		log.Printf("REVECIED REC RESPONSE | RAW %s | MASHALLED RESP %v", message, recommenaditonMessage)
+		recommenaditonMessage.UserID1 = userID
 
 		recommenaditonResponse, err = recSrv.HandleRecommendationResponse(recommenaditonMessage)
 		if err != nil {
