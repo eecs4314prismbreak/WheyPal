@@ -63,12 +63,13 @@ func getUser(c *gin.Context) {
 //POST /users
 func createUser(c *gin.Context) {
 	type CreateMessage struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		Birthday string `json:"birthday"`
-		Location string `json:"location"`
-		Interest string `json:"interest"`
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
+		Email     string `json:"email"`
+		Password  string `json:"password"`
+		Birthdate string `json:"birthdate"`
+		Location  string `json:"location"`
+		Interest  string `json:"interest"`
 	}
 
 	var message *CreateMessage
@@ -80,34 +81,34 @@ func createUser(c *gin.Context) {
 		return
 	}
 
-	user := &user.User{
-		Name:     message.Name,
-		Birthday: message.Birthday,
-		Location: message.Location,
-		Interest: message.Interest,
-	}
-
-	userCreated, err := userSrv.Create(user)
-	if err != nil {
-		c.JSON(500, fmt.Sprintf("%v", err))
-		return
-	}
-	fmt.Printf("IN THE THING: %v\n", user)
-
 	login := &auth.Login{
-		UserID:   userCreated.UserID,
 		Email:    message.Email,
 		Password: message.Password,
 	}
 
-	resp, err := authSrv.Create(login)
+	authResponse, err := authSrv.Create(login)
 
 	if err != nil {
 		c.JSON(500, fmt.Sprintf("%v", err))
 		return
 	}
 
-	c.JSON(200, &resp)
+	user := &user.User{
+		UserID:    authResponse.UserID,
+		FirstName: message.FirstName,
+		LastName:  message.LastName,
+		Birthdate: message.Birthdate,
+		Location:  message.Location,
+		Interest:  message.Interest,
+	}
+
+	_, err = userSrv.Create(user)
+	if err != nil {
+		c.JSON(500, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(200, &authResponse)
 }
 
 //PUT /user
@@ -167,10 +168,7 @@ func updateLogin(c *gin.Context) {
 
 func login(c *gin.Context) {
 	type LoginResponse struct {
-		Name     string `json:"name"`
-		Birthday string `json:"birthday"`
-		Location string `json:"location"`
-		Interest string `json:"interest"`
+		*user.User
 		*auth.AuthResponse
 	}
 
@@ -189,13 +187,10 @@ func login(c *gin.Context) {
 		return
 	}
 
-	userResponse, err := userSrv.Get(authResponse.ID)
+	userResponse, err := userSrv.Get(authResponse.UserID)
 
 	resp := &LoginResponse{
-		Name:         userResponse.Name,
-		Birthday:     userResponse.Birthday,
-		Location:     userResponse.Location,
-		Interest:     userResponse.Interest,
+		User:         userResponse,
 		AuthResponse: authResponse,
 	}
 	// fmt.Println("resp", resp)

@@ -41,7 +41,7 @@ func (db *userRepo) getAllUsers() ([]*User, error) {
 
 	for rows.Next() {
 		u := &User{}
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+		if err := rows.Scan(&u.UserID, &u.FirstName, &u.LastName, &u.Birthdate, &u.Location, &u.Interest); err != nil {
 			return nil, err
 		}
 		userList = append(userList, u)
@@ -57,7 +57,7 @@ func (db *userRepo) get(userID int) (*User, error) {
 	row := db.connector.QueryRow(sqlStatement, userID)
 
 	u := &User{}
-	if err := row.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+	if err := row.Scan(&u.UserID, &u.FirstName, &u.LastName, &u.Birthdate, &u.Location, &u.Interest); err != nil {
 		return nil, err
 	}
 
@@ -68,14 +68,11 @@ func (db *userRepo) get(userID int) (*User, error) {
 func (db *userRepo) create(user *User) (*User, error) {
 
 	// IWAACCT
-	sqlStatement := `INSERT INTO users(username, birthday, location, interest)
-	VALUES ($1, $2, $3, $4) RETURNING userid;`
+	sqlStatement := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6);`
 
-	lastInsertID := 0
-	err := db.connector.QueryRow(sqlStatement, user.Name, user.Birthday, user.Location, user.Interest).Scan(&lastInsertID)
+	_, err := db.connector.Exec(sqlStatement, user.UserID, user.FirstName, user.LastName, user.Birthdate, user.Location, user.Interest)
 
 	// Put ID into the user
-	user.UserID = lastInsertID
 
 	if err != nil {
 		return nil, err
@@ -94,17 +91,23 @@ func (db *userRepo) update(user *User) (*User, error) {
 	newUser := &User{}
 
 	// NAME
-	if user.Name == "" {
-		newUser.Name = oldUser.Name
+	if user.FirstName == "" {
+		newUser.FirstName = oldUser.FirstName
 	} else {
-		newUser.Name = user.Name
+		newUser.FirstName = user.FirstName
+	}
+
+	if user.LastName == "" {
+		newUser.LastName = oldUser.LastName
+	} else {
+		newUser.LastName = user.LastName
 	}
 
 	// BIRTHDAY
-	if user.Birthday == "" {
-		newUser.Birthday = oldUser.Birthday
+	if user.Birthdate == "" {
+		newUser.Birthdate = oldUser.Birthdate
 	} else {
-		newUser.Birthday = user.Birthday
+		newUser.Birthdate = user.Birthdate
 	}
 	// LOCATION
 	if user.Location == "" {
@@ -122,10 +125,10 @@ func (db *userRepo) update(user *User) (*User, error) {
 	// Insert new user into database
 	sqlStatement := `
 	UPDATE users
-	SET username = $1, birthday=$2, location=$3, interest=$4
-	WHERE userID = $5;`
+	SET firstName = $1, lastName = $2, birthday=$3, location=$4, interest=$5
+	WHERE userID = $6;`
 
-	_, err = db.connector.Exec(sqlStatement, newUser.Name, newUser.Birthday, newUser.Location, newUser.Interest, user.UserID)
+	_, err = db.connector.Exec(sqlStatement, newUser.FirstName, newUser.LastName, newUser.Birthdate, newUser.Location, newUser.Interest, user.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +139,7 @@ func (db *userRepo) getMatches(userID int) ([]*User, error) {
 	var userList []*User
 
 	sqlStatement := `SELECT
-						userid, username, birthday, location, interest 
+						userid, firstName, lastName, birthdate, location, interest 
 					FROM
 						matchrequest m 
 						RIGHT JOIN
@@ -157,7 +160,7 @@ func (db *userRepo) getMatches(userID int) ([]*User, error) {
 
 	for rows.Next() {
 		u := &User{}
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+		if err := rows.Scan(&u.UserID, &u.FirstName, &u.LastName, &u.Birthdate, &u.Location, &u.Interest); err != nil {
 			return nil, err
 		}
 		userList = append(userList, u)

@@ -53,7 +53,7 @@ func (s *authService) Login(login *LoginRequest) (*AuthResponse, error) {
 	}
 
 	token := &AuthResponse{
-		ID:          retrievedLogin.UserID,
+		UserID:      retrievedLogin.UserID,
 		Email:       retrievedLogin.Email,
 		StoredToken: storedToken,
 	}
@@ -107,7 +107,7 @@ func (s *authService) Create(login *Login) (*AuthResponse, error) {
 	}
 
 	token := &AuthResponse{
-		ID:          retrievedLogin.UserID,
+		UserID:      retrievedLogin.UserID,
 		Email:       retrievedLogin.Email,
 		StoredToken: tokenToStore,
 	}

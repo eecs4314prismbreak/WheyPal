@@ -91,13 +91,15 @@ func (r *authRepo) update(login *Login) (bool, error) {
 }
 
 func (r *authRepo) create(login *Login) (*Login, error) {
-	sqlStatement := `INSERT INTO logins(userid, email, hashedPass) VALUES ($1, $2, $3);;`
-	_, err := r.LoginRepo.Exec(sqlStatement, login.UserID, login.Email, login.Password)
+	sqlStatement := `INSERT INTO logins (email, hashedPass) VALUES ($1, $2) RETURNING userid;`
+	lastInsertID := 0
+	row := r.LoginRepo.QueryRow(sqlStatement, login.Email, login.Password).Scan(&lastInsertID)
 
-	if err != nil {
-		return nil, err
-		// return nil, err // Can either return error or just panic here
+	if row == sql.ErrNoRows {
+		return nil, errors.New("No login row created")
 	}
+
+	login.UserID = lastInsertID
 	return login, nil
 }
 

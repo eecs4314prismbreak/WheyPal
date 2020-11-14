@@ -33,8 +33,8 @@ type Login struct {
 }
 
 type AuthResponse struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
+	UserID int    `json:"userID"`
+	Email  string `json:"email"`
 	*StoredToken
 }
 

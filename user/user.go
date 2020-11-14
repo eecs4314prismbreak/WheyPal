@@ -11,11 +11,12 @@ func NewService() UserService {
 }
 
 type User struct {
-	UserID   int    `json:"userID"`
-	Name     string `json:"name"`
-	Birthday string `json:"birthday"`
-	Location string `json:"location"`
-	Interest string `json:"interest"`
+	UserID    int    `json:"userID"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Birthdate string `json:"birthdate"`
+	Location  string `json:"location"`
+	Interest  string `json:"interest"`
 }
 
 type UsersResponse struct {
@@ -27,7 +28,6 @@ type MatchStatus string
 const (
 	StatusAccept   MatchStatus = "accepted"
 	StatusDecline  MatchStatus = "declined"
-	StatusPendingA MatchStatus = "pendingUserA"
-	StatusPendingB MatchStatus = "pendingUserB"
+	StatusPendingA MatchStatus = "pendingUser"
 	StatusNotFound MatchStatus = "notFound"
 )
