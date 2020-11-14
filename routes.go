@@ -42,15 +42,15 @@ func getAllUsers(c *gin.Context) {
 
 // GET /users/:id
 func getUser(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	// id, _ := strconv.Atoi(c.Param("id"))
 
 	idFromToken := c.GetInt("userID")
-	if idFromToken != id {
-		c.JSON(401, fmt.Sprintf("%v", errors.New("UserID does not match claim from token")))
-		return
-	}
+	// if idFromToken != id {
+	// 	c.JSON(401, fmt.Sprintf("%v", errors.New("UserID does not match claim from token")))
+	// 	return
+	// }
 
-	resp, err := userSrv.Get(id)
+	resp, err := userSrv.Get(idFromToken)
 
 	if err != nil {
 		c.JSON(500, fmt.Sprintf("%v", err))
