@@ -1,5 +1,15 @@
-docker:
+build:
 	docker build -t eecs4314prismbreak/wheypal .
 
-adduser:
-	curl -v -H "Content-Type:application/json" -X POST -d '{"Name": "kevin", "Email":"ke@v.in", "Password":"k3v1n", "Birthday":"Kevin 1st, 1998", "Location":"21 Kevin Street", "Interest":"Kevinterests"}' localhost:8081/user
+pull:
+	sudo docker pull eecs4314prismbreak/wheypal
+
+push:
+	sudo docker push eecs4314prismbreak/wheypal
+
+run:
+	sudo docker run  --rm -d -p 8080:8080 -e PORT='8080' \
+		--name wheypal-backend eecs4314prismbreak/wheypal
+
+kill:
+	sudo docker kill wheypal-backend

@@ -40,8 +40,8 @@ func main() {
 	recSrv = rec.NewService()
 
 	router.GET("/", homeHandler)
-	router.GET("/user", auth.CheckJWT(), getAllUsers)
-	router.GET("/user/:id", auth.CheckJWT(), getUser)
+	router.GET("/users", auth.CheckJWT(), getAllUsers)
+	router.GET("/user", auth.CheckJWT(), getUser)
 	router.PUT("/user", auth.CheckJWT(), updateUser)
 	router.POST("/user", createUser)
 	router.POST("/login", login)

@@ -53,7 +53,9 @@ func LoadPGDB() *sql.DB {
 }
 
 func LoadRedis() *redis.Client {
+	addr := viper.GetString("Redis.address")
+	log.Printf("Auth Redis Connection Successful @ %s\n", addr)
 	return redis.NewClient(&redis.Options{
-		Addr: viper.GetString("Redis.address"),
+		Addr: addr,
 	})
 }
