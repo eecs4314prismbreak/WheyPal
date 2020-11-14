@@ -123,21 +123,31 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 	var userList []*user.User
 
 	sqlStatement := `
-		SELECT 
-			u.userid, u.username, u.birthday, u.location, u.interest
-		FROM
-			users u
-		WHERE
-			u.interest IN
-				(
-					SELECT u.interest
-					FROM users u
-					WHERE u.userid = $1
-				)
-			AND
-			u.userid != $1
-		;
+	SELECT 	u.userid, u.username, u.birthday, u.location, u.interest
+	FROM users u
+	WHERE  
+		u.interest IN
+		(
+			SELECT u.interest
+			FROM users u
+			WHERE u.userid = 18
+		)
+		AND u.userid NOT EXESTS
+		(
+			SELECT mr.usera
+			FROM matchrequest mr
+			WHERE mr.userb = 18
+		)
+		AND u.userid NOT EXISTS
+			(
+				SELECT mr.userb
+				FROM matchrequest mr
+				WHERE mr.usera = 18
+			)
+		AND u.userid != $1
+	;	
 	`
+
 	// rows, err := r.connector.Query(sqlStatement, "pendingUserB", userID)
 	rows, err := r.connector.Query(sqlStatement, userID)
 	if err != nil {
@@ -147,7 +157,7 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 	for rows.Next() {
 		u := &user.User{}
 		//11NOV @AMER make sure this here is correct
-		if err := rows.Scan(&u.UserID, &u.Name, &u.Birthday, &u.Location, &u.Interest); err != nil {
+		if err := rows.Scan(&u.UserID, &u.FirstName, &u.LastName, &u.Birthdate, &u.Location, &u.Interest); err != nil {
 			return nil, err
 		}
 		userList = append(userList, u)
@@ -157,7 +167,14 @@ func (r *recommendationRepo) getRecommendations(userID int) ([]*user.User, error
 }
 
 func (r *recommendationRepo) monoMatchHandle(userID, targetUserID int, resp RecommendationResponse) error {
-	sqlStatement := `INSERT INTO matchrequest( status, usera, userb ) VALUES ( $1, $2, $3 );`
+	sqlStatement := `INSERT INTO matchrequest( status, usera, userb ) VALUES ( $1, $2, $3 ) 
+						WHERE NOT EXISTS (
+									SELECT usera, userb 
+									FROM matchrequest 
+									WHERE usera = $1 and usberb = $2
+						)
+					;
+	`
 
 	var respString user.MatchStatus
 
