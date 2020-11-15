@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"time"
 )
@@ -17,7 +16,6 @@ type AuthService interface {
 
 func (s *authService) Login(login *LoginRequest) (*AuthResponse, error) {
 	//find user based on email
-	fmt.Printf("User Login | EMAIL:", login.Email)
 	retrievedLogin, err := s.Repo.getLogin(login.Email)
 	if err != nil {
 		log.Printf("GET LOGIN ERR | %v", err)

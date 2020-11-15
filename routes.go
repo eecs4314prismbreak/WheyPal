@@ -44,6 +44,8 @@ func getUser(c *gin.Context) {
 	// id, _ := strconv.Atoi(c.Param("id"))
 
 	idFromToken := c.GetInt("userID")
+
+	fmt.Printf("RECIEVED GET USER | ID: %v ", idFromToken)
 	// if idFromToken != id {
 	// 	c.JSON(401, fmt.Sprintf("%v", errors.New("UserID does not match claim from token")))
 	// 	return
@@ -79,6 +81,8 @@ func createUser(c *gin.Context) {
 		c.JSON(500, fmt.Sprintf("%v", err))
 		return
 	}
+
+	fmt.Printf("RECIEVED CREATE ACCOUNT | EMAIL: %s ", message.Email)
 
 	login := &auth.Login{
 		Email:    message.Email,
@@ -117,6 +121,8 @@ func updateUser(c *gin.Context) {
 	err := c.ShouldBind(&user)
 
 	idFromToken := c.GetInt("userID")
+
+	fmt.Printf("RECIEVED UPDATE PROFILE | ID: %s ", idFromToken)
 	// if idFromToken != user.UserID {
 	// 	c.JSON(401, fmt.Sprintf("%v", errors.New("UserID adoes not match claims from token")))
 	// 	return
@@ -140,6 +146,8 @@ func updateLogin(c *gin.Context) {
 	err := c.ShouldBind(&login)
 
 	idFromToken := c.GetInt("userID")
+
+	fmt.Printf("RECIEVED UPDATE LOGIN | ID: %s ", idFromToken)
 	// if login.UserID != idFromToken {
 	// 	c.AbortWithStatusJSON(401, fmt.Sprintf("UserID from Token does not match UserID in request body"))
 	// 	return
@@ -186,6 +194,8 @@ func login(c *gin.Context) {
 		return
 	}
 
+	fmt.Printf("RECIEVED LOGIN | EMAIL: %s ", login.Email)
+
 	authResponse, err := authSrv.Login(login)
 
 	if err != nil {
@@ -194,7 +204,7 @@ func login(c *gin.Context) {
 	}
 
 	userResponse, err := userSrv.Get(authResponse.UserID)
-	fmt.Printf("userID", userResponse.UserID)
+	// fmt.Printf("userID", userResponse.UserID)
 	resp := &LoginResponse{
 		User:        userResponse,
 		Email:       authResponse.Email,
@@ -242,7 +252,11 @@ func recommend(c *gin.Context) {
 	// 	return
 	// }
 
-	claims, _ := auth.ClaimsFromToken(string(message))
+	claims, err := auth.ClaimsFromToken(string(message))
+	if err != nil {
+		log.Printf("RECOMMENDATION WEBSOCKET | COULD NOT GET CLAIMS FROM TOKEN | %v", err)
+		return
+	}
 	userID := claims.UserID
 
 	var recommenaditonMessage *rec.RecommendationMessage
@@ -266,9 +280,9 @@ func recommend(c *gin.Context) {
 
 	recMsg, _ := json.Marshal(recs)
 	// log.Printf("SENDING RECS TO USER | UID %v | RECS %s", userID, recMsg)
-	log.Printf("SENDING RECS TO USER | UID %v", userID)
+	log.Printf("SENDING RECS TO USER | UID %v | # of RECS %v", userID, len(recs))
 
-	err = conn.WriteMessage(1, recMsg)
+	err = conn.WriteMessage(1, recMsg) //1 = text, 2 = binacy
 	if err != nil {
 		log.Println("write:", err)
 		return
@@ -283,13 +297,15 @@ func recommend(c *gin.Context) {
 
 		// log.Printf("recv: %s", message)
 
+		// log.Printf("REVECIED REC RESPONSE | RAW %s | MASHALLED RESP %v", message, recommenaditonMessage)
+		log.Printf("REVECIED REC RESPONSE | RAW %s", message)
+
 		err = json.Unmarshal(message, &recommenaditonMessage)
 		if err != nil {
 			log.Printf("Could not unmashall recommendation response | MT %v | RESP: %s\nERR: %v", mt, message, err)
 			break
 		}
 		// log.Printf("recv: %s", message)
-		log.Printf("REVECIED REC RESPONSE | RAW %s | MASHALLED RESP %v", message, recommenaditonMessage)
 		recommenaditonMessage.UserID1 = userID
 
 		recommenaditonResponse, err = recSrv.HandleRecommendationResponse(recommenaditonMessage)
@@ -304,7 +320,7 @@ func recommend(c *gin.Context) {
 			break
 		}
 
-		log.Printf("SENDING REC RESPONSE | MASHALLED RESP %s", response)
+		log.Printf("SENDING REC RESPONSE | UID %v | RECS REMAINING %v | MASHALLED RESP %s", userID, count, response)
 		err = conn.WriteMessage(mt, response)
 		if err != nil {
 			log.Println("write:", err)
@@ -346,6 +362,8 @@ func getMatches(c *gin.Context) {
 func deleteMatch(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	idFromToken := c.GetInt("userID")
+
+	fmt.Printf("RECIEVED DELETE MATCH | UID: %v | TARGET ID: %v ", id, idFromToken)
 
 	resp, err := userSrv.DeleteMatch(idFromToken, id)
 
