@@ -52,13 +52,13 @@ func (s *authService) Login(login *LoginRequest) (*AuthResponse, error) {
 		storedToken, err = s.generateToken(retrievedLogin.UserID)
 	}
 
-	token := &AuthResponse{
+	resp := &AuthResponse{
 		UserID:      retrievedLogin.UserID,
 		Email:       retrievedLogin.Email,
 		StoredToken: storedToken,
 	}
 
-	return token, nil
+	return resp, nil
 }
 
 func (s *authService) ValidateToken(userID int, token string) (*Claims, error) {
@@ -120,6 +120,10 @@ func (s *authService) Update(userID int, loginRequest *LoginRequest) (bool, erro
 		UserID:   userID,
 		Email:    loginRequest.Email,
 		Password: loginRequest.Password,
+	}
+
+	if login.Password != "" {
+		login.Password, _ = hashPassword(login.Password)
 	}
 
 	updateSuccess, err := s.Repo.update(login)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -118,10 +117,12 @@ func updateUser(c *gin.Context) {
 	err := c.ShouldBind(&user)
 
 	idFromToken := c.GetInt("userID")
-	if idFromToken != user.UserID {
-		c.JSON(401, fmt.Sprintf("%v", errors.New("UserID adoes not match claims from token")))
-		return
-	}
+	// if idFromToken != user.UserID {
+	// 	c.JSON(401, fmt.Sprintf("%v", errors.New("UserID adoes not match claims from token")))
+	// 	return
+	// }
+
+	user.UserID = idFromToken
 
 	updatedUser, err := userSrv.Update(user)
 
@@ -139,6 +140,10 @@ func updateLogin(c *gin.Context) {
 	err := c.ShouldBind(&login)
 
 	idFromToken := c.GetInt("userID")
+	// if login.UserID != idFromToken {
+	// 	c.AbortWithStatusJSON(401, fmt.Sprintf("UserID from Token does not match UserID in request body"))
+	// 	return
+	// }
 
 	resp, err := authSrv.Update(idFromToken, login)
 
@@ -169,7 +174,8 @@ func updateLogin(c *gin.Context) {
 func login(c *gin.Context) {
 	type LoginResponse struct {
 		*user.User
-		*auth.AuthResponse
+		Email string `json:"email"`
+		*auth.StoredToken
 	}
 
 	var login *auth.LoginRequest
@@ -188,10 +194,11 @@ func login(c *gin.Context) {
 	}
 
 	userResponse, err := userSrv.Get(authResponse.UserID)
-
+	fmt.Printf("userID", userResponse.UserID)
 	resp := &LoginResponse{
-		User:         userResponse,
-		AuthResponse: authResponse,
+		User:        userResponse,
+		Email:       authResponse.Email,
+		StoredToken: authResponse.StoredToken,
 	}
 	// fmt.Println("resp", resp)
 	c.JSON(200, &resp)

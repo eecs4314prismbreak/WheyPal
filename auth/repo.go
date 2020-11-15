@@ -79,8 +79,8 @@ func (r *authRepo) update(login *Login) (bool, error) {
 	// Insert new user into database
 	sqlStatement := `
 		UPDATE logins
-		SET email=$1, password = $2
-		WHERE id = $3;`
+		SET email=$1, hashedpass = $2
+		WHERE userid = $3;`
 
 	_, err := r.LoginRepo.Exec(sqlStatement, newLogin.Email, newLogin.Password, login.UserID)
 
