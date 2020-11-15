@@ -60,7 +60,6 @@ func (db *userRepo) get(userID int) (*User, error) {
 	if err := row.Scan(&u.UserID, &u.FirstName, &u.LastName, &u.Birthdate, &u.Location, &u.Interest); err != nil {
 		return nil, err
 	}
-
 	return u, nil
 }
 
@@ -125,7 +124,7 @@ func (db *userRepo) update(user *User) (*User, error) {
 	// Insert new user into database
 	sqlStatement := `
 	UPDATE users
-	SET firstName = $1, lastName = $2, birthday=$3, location=$4, interest=$5
+	SET firstName = $1, lastName = $2, birthdate=$3, location=$4, interest=$5
 	WHERE userID = $6;`
 
 	_, err = db.connector.Exec(sqlStatement, newUser.FirstName, newUser.LastName, newUser.Birthdate, newUser.Location, newUser.Interest, user.UserID)
