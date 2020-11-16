@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	dbCredFile = "config/db_credentials"
+	dbCredFile = "config/private/db_credentials"
 )
 
 func initConfig() {
