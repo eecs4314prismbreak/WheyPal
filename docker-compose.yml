@@ -2,20 +2,20 @@ version: "3.8"
    
 services:
   web:
-    image: eecs4314prismbreak/wheypal:latest
+    image: eecs4314prismbreak/wheypal
     ports:
-      - "8081:8081"
+      - "443:443"
     environment:
-      - PORT=8081
+      - PORT=443
       - REDIS=redis:6379
-    depends_on:
-      - redis
+    # depends_on:
+    #   - redis
     #   - db
-  redis:
-    image: redis:6.0.6-alpine
-    command: redis-server
-    ports:
-      - 6379:6379
+  # redis:
+  #   image: redis:6.0.6-alpine
+  #   command: redis-server
+  #   ports:
+  #     - 6379:6379
   # frontend:
   #     image: eecs4314prismbreak/wheypal-frontend:latest
   #     ports:

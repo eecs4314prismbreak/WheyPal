@@ -51,5 +51,5 @@ func main() {
 	router.GET("/match", auth.CheckJWT(), getMatches)
 	router.DELETE("/match/:id", auth.CheckJWT(), deleteMatch)
 
-	router.Run(":" + port)
+	router.RunTLS(":"+port, "./config/private/wheypal.com_ssl_certificate.cer", "./config/private/wheypal.com_private_key.key")
 }
