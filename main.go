@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io"
+	"log"
 	"os"
 	"time"
 
@@ -22,6 +24,14 @@ func main() {
 	if len(port) == 0 {
 		port = "8081"
 	}
+
+	// Logging to a file.
+	f, _ := os.Create("gin.log")
+	defer f.Close()
+	// Use the following code if you need to write the logs to file and console at the same time.
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+	log.SetPrefix("[DEBUG] ")
+	log.SetOutput(io.MultiWriter(f, os.Stdout))
 
 	router := gin.Default()
 
@@ -50,6 +60,8 @@ func main() {
 	router.GET("/recommend", recommend)
 	router.GET("/match", auth.CheckJWT(), getMatches)
 	router.DELETE("/match/:id", auth.CheckJWT(), deleteMatch)
+	router.GET("/ping", ping)
+	router.POST("/logs", showLogs)
 
 	if port == "443" {
 		router.RunTLS(":"+port, "./config/private/wheypal.com_ssl_certificate.cer", "./config/private/wheypal.com_private_key.key")

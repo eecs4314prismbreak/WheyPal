@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	auth "github.com/eecs4314prismbreak/WheyPal/auth"
 	rec "github.com/eecs4314prismbreak/WheyPal/recommendation"
@@ -45,7 +47,7 @@ func getUser(c *gin.Context) {
 
 	idFromToken := c.GetInt("userID")
 
-	fmt.Printf("RECIEVED GET USER | ID: %v ", idFromToken)
+	fmt.Printf("[UserService] [GetProfile] ID: %v ", idFromToken)
 	// if idFromToken != id {
 	// 	c.JSON(401, fmt.Sprintf("%v", errors.New("UserID does not match claim from token")))
 	// 	return
@@ -82,7 +84,7 @@ func createUser(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("RECIEVED CREATE ACCOUNT | EMAIL: %s ", message.Email)
+	fmt.Printf("[UserService] [CreateProfile] Name: %s %s ", message.FirstName, message.LastName)
 
 	login := &auth.Login{
 		Email:    message.Email,
@@ -122,7 +124,7 @@ func updateUser(c *gin.Context) {
 
 	idFromToken := c.GetInt("userID")
 
-	fmt.Printf("RECIEVED UPDATE PROFILE | ID: %s ", idFromToken)
+	fmt.Printf("[UserService] [UpdateProfile] ID: %v ", idFromToken)
 	// if idFromToken != user.UserID {
 	// 	c.JSON(401, fmt.Sprintf("%v", errors.New("UserID adoes not match claims from token")))
 	// 	return
@@ -147,7 +149,7 @@ func updateLogin(c *gin.Context) {
 
 	idFromToken := c.GetInt("userID")
 
-	fmt.Printf("RECIEVED UPDATE LOGIN | ID: %s ", idFromToken)
+	fmt.Printf("[AuthService] [UpdateLogin] ID: %v ", idFromToken)
 	// if login.UserID != idFromToken {
 	// 	c.AbortWithStatusJSON(401, fmt.Sprintf("UserID from Token does not match UserID in request body"))
 	// 	return
@@ -194,7 +196,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("RECIEVED LOGIN | EMAIL: %s ", login.Email)
+	fmt.Printf("[AuthServie] [Login] EMAIL: %s ", login.Email)
 
 	authResponse, err := authSrv.Login(login)
 
@@ -254,7 +256,7 @@ func recommend(c *gin.Context) {
 
 	claims, err := auth.ClaimsFromToken(string(message))
 	if err != nil {
-		log.Printf("RECOMMENDATION WEBSOCKET | COULD NOT GET CLAIMS FROM TOKEN | %v", err)
+		log.Printf("[RecService] [Error] %v", err)
 		return
 	}
 	userID := claims.UserID
@@ -267,7 +269,7 @@ func recommend(c *gin.Context) {
 	recs, err = recSrv.GetRecommendations(userID)
 	// recs, err = recSrv.GetRecommendations(5)
 	if err != nil {
-		log.Printf("ERROR SENDING REC ON WEBSOCKET | UID %v | RECS %v", userID, err)
+		log.Printf("[RecService] [Error] UID %v | Error %v", userID, err)
 		return
 	}
 
@@ -280,7 +282,7 @@ func recommend(c *gin.Context) {
 
 	recMsg, _ := json.Marshal(recs)
 	// log.Printf("SENDING RECS TO USER | UID %v | RECS %s", userID, recMsg)
-	log.Printf("SENDING RECS TO USER | UID %v | # of RECS %v", userID, len(recs))
+	log.Printf("[RecService] [SendRecommendations] UID %v | # of RECS %v", userID, len(recs))
 
 	err = conn.WriteMessage(1, recMsg) //1 = text, 2 = binacy
 	if err != nil {
@@ -363,7 +365,7 @@ func deleteMatch(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	idFromToken := c.GetInt("userID")
 
-	fmt.Printf("RECIEVED DELETE MATCH | UID: %v | TARGET ID: %v ", id, idFromToken)
+	fmt.Printf("[UserService] [DeleteMatch] UID: %v | TARGET ID: %v ", id, idFromToken)
 
 	resp, err := userSrv.DeleteMatch(idFromToken, id)
 
@@ -374,4 +376,45 @@ func deleteMatch(c *gin.Context) {
 	}
 
 	c.JSON(200, &resp)
+}
+
+func showLogs(c *gin.Context) {
+	var password string
+	c.ShouldBind(&password)
+	if password != "showmethelogs" {
+		c.Abort()
+	}
+
+	content, err := ioutil.ReadFile("gin.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	text := string(content)
+	c.String(200, text)
+}
+
+var requests = make(map[string][]time.Time)
+
+func ping(c *gin.Context) {
+	processPing(c.ClientIP())
+	requests[c.ClientIP()] = append(requests[c.ClientIP()], time.Now())
+	if len(requests[c.ClientIP()]) > 3 {
+		log.Printf("[RateLimitter] [RequestRejected] IP: %s", c.ClientIP())
+		c.JSON(502, "you are sending too many requests, please wait 1 minute before sending aother request")
+	} else {
+		log.Printf("[RateLimitter] [RequestRecieved] IP: %s", c.ClientIP())
+		c.JSON(200, gin.H{"message": "pong"})
+	}
+}
+
+func processPing(clientIP string) {
+	i := 0
+	for _, ping := range requests[clientIP] {
+		tempPing := ping.Add(time.Minute)
+		if tempPing.Before(time.Now()) {
+			requests[clientIP] = append(requests[clientIP][:i], requests[clientIP][i+1:]...)
+		} else {
+			i++
+		}
+	}
 }
