@@ -1,0 +1,33 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[DEBUG] 2020/11/29 13:42:09 User Database Connection Successful
+[DEBUG] 2020/11/29 13:42:09 Auth Database Connection Successful
+[DEBUG] 2020/11/29 13:42:09 Auth Redis Connection Successful @ wheypal.vsjj5d.ng.0001.use1.cache.amazonaws.com:6379
+[DEBUG] 2020/11/29 13:42:09 Recommendation Database Connection Successful
+[GIN-debug] GET    /                         --> main.homeHandler (4 handlers)
+[GIN-debug] GET    /users                    --> main.getAllUsers (5 handlers)
+[GIN-debug] GET    /user                     --> main.getUser (5 handlers)
+[GIN-debug] PUT    /user                     --> main.updateUser (5 handlers)
+[GIN-debug] POST   /user                     --> main.createUser (4 handlers)
+[GIN-debug] POST   /login                    --> main.login (4 handlers)
+[GIN-debug] PUT    /login                    --> main.updateLogin (5 handlers)
+[GIN-debug] POST   /auth                     --> main.validate (5 handlers)
+[GIN-debug] GET    /recommend                --> main.recommend (4 handlers)
+[GIN-debug] GET    /match                    --> main.getMatches (5 handlers)
+[GIN-debug] DELETE /match/:id                --> main.deleteMatch (5 handlers)
+[GIN-debug] GET    /ping                     --> main.ping (4 handlers)
+[GIN-debug] GET    /logs                     --> main.showLogs (4 handlers)
+[GIN-debug] Listening and serving HTTP on :8081
+[DEBUG] 2020/11/29 13:42:20 [RateLimitter] [RequestRecieved] IP: ::1
+[GIN] 2020/11/29 - 13:42:20 | 200 |     195.962µs |             ::1 | GET      "/ping"
+[DEBUG] 2020/11/29 13:42:20 [RateLimitter] [RequestRecieved] IP: ::1
+[GIN] 2020/11/29 - 13:42:20 | 200 |      198.07µs |             ::1 | GET      "/ping"
+[DEBUG] 2020/11/29 13:42:21 [RateLimitter] [RequestRecieved] IP: ::1
+[GIN] 2020/11/29 - 13:42:21 | 200 |      97.026µs |             ::1 | GET      "/ping"
+[DEBUG] 2020/11/29 13:42:21 [RateLimitter] [RequestRejected] IP: ::1
+[GIN] 2020/11/29 - 13:42:21 | 502 |     225.496µs |             ::1 | GET      "/ping"
+[GIN] 2020/11/29 - 13:42:25 | 200 |     114.955µs |             ::1 | GET      "/logs"
